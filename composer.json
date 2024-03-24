@@ -1,0 +1,17 @@
+{
+    "name": "adithwidhiantara/crud",
+    "description": "CRUD Generator by adithwidhiantara",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Adithwidhiantara\\Crud\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "adithwidhiantara"
+        }
+    ],
+    "require": {}
+}
