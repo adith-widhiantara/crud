@@ -1,0 +1,25 @@
+{
+    "name": "adithwidhiantara/crud",
+    "description": "Generate Simple CRUD",
+    "type": "package",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Adithwidhiantara\\Crud\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Adithwidhiantara\\Crud\\CrudServiceProvider"
+            ]
+        }
+    },
+    "authors": [
+        {
+            "name": "Adith Widhiantara"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {}
+}
