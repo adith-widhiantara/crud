@@ -15,6 +15,8 @@ abstract class BaseCrudController extends BaseController
 {
     abstract protected function model(): Model;
 
+    // oke trye
+
     public function index(): JsonResponse
     {
         return Response::json($this->model()->all());
