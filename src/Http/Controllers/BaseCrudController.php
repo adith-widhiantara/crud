@@ -13,12 +13,12 @@ use Spatie\RouteDiscovery\Attributes\Route;
 
 abstract class BaseCrudController extends BaseController
 {
-    abstract protected function model(): Model;
+abstract protected function model(): Model;
 
-    public function index(): JsonResponse
-    {
-        return Response::json($this->model()->all());
-    }
+public function index(): JsonResponse
+{
+    return Response::json($this->model()->all());
+}
 
     public function store(Request $request): JsonResponse
     {
