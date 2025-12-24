@@ -4,7 +4,7 @@
     "lint-staged": "^16.2.7"
   },
   "scripts": {
-    "prepare": "husky install"
+    "prepare": "husky"
   },
   "lint-staged": {
     "**/*.php": "./vendor/bin/pint --parallel"
