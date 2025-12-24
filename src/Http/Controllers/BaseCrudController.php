@@ -4,15 +4,16 @@ declare(strict_types=1);
 
 namespace Adithwidhiantara\Crud\Http\Controllers;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Response;
+use Spatie\RouteDiscovery\Attributes\Route;
 
 abstract class BaseCrudController extends BaseController
 {
-    abstract public function model(): Model;
+    abstract protected function model(): Model;
 
     public function index(): JsonResponse
     {
@@ -31,12 +32,14 @@ abstract class BaseCrudController extends BaseController
         ]);
     }
 
+    #[Route(uri: '{id}')]
     public function show(string|int $id): JsonResponse
     {
         return Response::json($this->model()->query()->findOrFail($id));
     }
 
-    public function update(string|int $id, Request $request): JsonResponse
+    #[Route(uri: '{id}')]
+    public function update(Request $request, string|int $id): JsonResponse
     {
         $updatedData = $this->model()
             ->query()
@@ -49,6 +52,7 @@ abstract class BaseCrudController extends BaseController
         ]);
     }
 
+    #[Route(uri: '{id}')]
     public function destroy(string|int $id): JsonResponse
     {
         $this->model()

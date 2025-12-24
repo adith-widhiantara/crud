@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cc715d81f30d88067af16fcae8b0b5c0",
+    "content-hash": "c8668b233bd259927b8f190bd8a81ddd",
     "packages": [
         {
             "name": "brick/math",
@@ -717,12 +717,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/collections.git",
-                "reference": "3efd349af25ee8622dcdef1c3f049500eac77ec0"
+                "reference": "62b357e85711932da73f90a606d80ac09027d54c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/illuminate/collections/zipball/3efd349af25ee8622dcdef1c3f049500eac77ec0",
-                "reference": "3efd349af25ee8622dcdef1c3f049500eac77ec0",
+                "url": "https://api.github.com/repos/illuminate/collections/zipball/62b357e85711932da73f90a606d80ac09027d54c",
+                "reference": "62b357e85711932da73f90a606d80ac09027d54c",
                 "shasum": ""
             },
             "require": {
@@ -769,7 +769,7 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
-            "time": "2025-12-20T22:32:23+00:00"
+            "time": "2025-12-21T14:16:59+00:00"
         },
         {
             "name": "illuminate/conditionable",
@@ -933,12 +933,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/database.git",
-                "reference": "29f1cfd6a14d12e388c0c00b3f059b0a25af764f"
+                "reference": "90e57a3b7d2ae57b00846c6572796b585264927f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/illuminate/database/zipball/29f1cfd6a14d12e388c0c00b3f059b0a25af764f",
-                "reference": "29f1cfd6a14d12e388c0c00b3f059b0a25af764f",
+                "url": "https://api.github.com/repos/illuminate/database/zipball/90e57a3b7d2ae57b00846c6572796b585264927f",
+                "reference": "90e57a3b7d2ae57b00846c6572796b585264927f",
                 "shasum": ""
             },
             "require": {
@@ -997,7 +997,7 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
-            "time": "2025-12-21T23:59:24+00:00"
+            "time": "2025-12-22T15:31:12+00:00"
         },
         {
             "name": "illuminate/filesystem",
@@ -1072,12 +1072,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/http.git",
-                "reference": "27837d28ac8f941d9f0f964ac682c5c540a11f66"
+                "reference": "5e16bea1399ab83bcd5322c251e0a8568bdea0a3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/illuminate/http/zipball/27837d28ac8f941d9f0f964ac682c5c540a11f66",
-                "reference": "27837d28ac8f941d9f0f964ac682c5c540a11f66",
+                "url": "https://api.github.com/repos/illuminate/http/zipball/5e16bea1399ab83bcd5322c251e0a8568bdea0a3",
+                "reference": "5e16bea1399ab83bcd5322c251e0a8568bdea0a3",
                 "shasum": ""
             },
             "require": {
@@ -1126,7 +1126,7 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
-            "time": "2025-12-17T15:47:20+00:00"
+            "time": "2025-12-23T15:41:46+00:00"
         },
         {
             "name": "illuminate/macroable",
@@ -1549,12 +1549,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/CarbonPHP/carbon.git",
-                "reference": "fc984f8f25f7e71bbffe1a8f657893db1977d84e"
+                "reference": "33cef4b988018ec199dd88d216c3487ec37f14b8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/CarbonPHP/carbon/zipball/fc984f8f25f7e71bbffe1a8f657893db1977d84e",
-                "reference": "fc984f8f25f7e71bbffe1a8f657893db1977d84e",
+                "url": "https://api.github.com/repos/CarbonPHP/carbon/zipball/33cef4b988018ec199dd88d216c3487ec37f14b8",
+                "reference": "33cef4b988018ec199dd88d216c3487ec37f14b8",
                 "shasum": ""
             },
             "require": {
@@ -1647,7 +1647,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-12-15T08:01:51+00:00"
+            "time": "2025-12-22T20:34:24+00:00"
         },
         {
             "name": "psr/clock",
@@ -2114,6 +2114,146 @@
             "time": "2019-03-08T08:55:37+00:00"
         },
         {
+            "name": "spatie/laravel-package-tools",
+            "version": "1.92.7",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/spatie/laravel-package-tools.git",
+                "reference": "f09a799850b1ed765103a4f0b4355006360c49a5"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/spatie/laravel-package-tools/zipball/f09a799850b1ed765103a4f0b4355006360c49a5",
+                "reference": "f09a799850b1ed765103a4f0b4355006360c49a5",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/contracts": "^9.28|^10.0|^11.0|^12.0",
+                "php": "^8.0"
+            },
+            "require-dev": {
+                "mockery/mockery": "^1.5",
+                "orchestra/testbench": "^7.7|^8.0|^9.0|^10.0",
+                "pestphp/pest": "^1.23|^2.1|^3.1",
+                "phpunit/php-code-coverage": "^9.0|^10.0|^11.0",
+                "phpunit/phpunit": "^9.5.24|^10.5|^11.5",
+                "spatie/pest-plugin-test-time": "^1.1|^2.2"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Spatie\\LaravelPackageTools\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Freek Van der Herten",
+                    "email": "freek@spatie.be",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Tools for creating Laravel packages",
+            "homepage": "https://github.com/spatie/laravel-package-tools",
+            "keywords": [
+                "laravel-package-tools",
+                "spatie"
+            ],
+            "support": {
+                "issues": "https://github.com/spatie/laravel-package-tools/issues",
+                "source": "https://github.com/spatie/laravel-package-tools/tree/1.92.7"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/spatie",
+                    "type": "github"
+                }
+            ],
+            "time": "2025-07-17T15:46:43+00:00"
+        },
+        {
+            "name": "spatie/laravel-route-discovery",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/spatie/laravel-route-discovery.git",
+                "reference": "aad064371560d0de1e69dacccf60fe232cf8e4d5"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/spatie/laravel-route-discovery/zipball/aad064371560d0de1e69dacccf60fe232cf8e4d5",
+                "reference": "aad064371560d0de1e69dacccf60fe232cf8e4d5",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/contracts": "^8.67|^9.0|^10.0|^11.0|^12.0",
+                "illuminate/support": "^8.77|^9.0|^10.0|^11.0|^12.0",
+                "php": "^8.0",
+                "spatie/laravel-package-tools": "^1.10",
+                "symfony/finder": "^5.4.2|^6.0|^7.0"
+            },
+            "require-dev": {
+                "larastan/larastan": "^1.0|^2.0|^3.0",
+                "orchestra/testbench": "^6.23.2|^7.0|^8.0|^9.0|^10.0",
+                "pestphp/pest": "^1.21|^2.34|^3.7",
+                "phpstan/extension-installer": "^1.1",
+                "phpstan/phpstan-deprecation-rules": "^1.0|^2.0",
+                "phpstan/phpstan-phpunit": "^1.0|^2.0",
+                "spatie/laravel-ray": "^1.27"
+            },
+            "default-branch": true,
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Spatie\\RouteDiscovery\\RouteDiscoveryServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Spatie\\RouteDiscovery\\": "src",
+                    "Spatie\\RouteDiscovery\\Database\\Factories\\": "database/factories"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Freek Van der Herten",
+                    "email": "freek@spatie.be",
+                    "homepage": "https://spatie.be",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Auto register routes using PHP attributes",
+            "homepage": "https://github.com/spatie/laravel-route-discovery",
+            "keywords": [
+                "laravel-route-discovery",
+                "spatie"
+            ],
+            "support": {
+                "issues": "https://github.com/spatie/laravel-route-discovery/issues",
+                "source": "https://github.com/spatie/laravel-route-discovery/tree/main"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/sponsors/spatie",
+                    "type": "github"
+                },
+                {
+                    "url": "https://spatie.be/open-source/support-us",
+                    "type": "other"
+                }
+            ],
+            "time": "2025-10-16T07:37:35+00:00"
+        },
+        {
             "name": "symfony/clock",
             "version": "8.1.x-dev",
             "source": {
@@ -2515,12 +2655,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/finder.git",
-                "reference": "340b9ed7320570f319028a2cbec46d40535e94bd"
+                "reference": "fffe05569336549b20a1be64250b40516d6e8d06"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/finder/zipball/340b9ed7320570f319028a2cbec46d40535e94bd",
-                "reference": "340b9ed7320570f319028a2cbec46d40535e94bd",
+                "url": "https://api.github.com/repos/symfony/finder/zipball/fffe05569336549b20a1be64250b40516d6e8d06",
+                "reference": "fffe05569336549b20a1be64250b40516d6e8d06",
                 "shasum": ""
             },
             "require": {
@@ -2575,7 +2715,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-11-05T05:42:40+00:00"
+            "time": "2025-12-23T14:50:43+00:00"
         },
         {
             "name": "symfony/http-foundation",
@@ -2583,12 +2723,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/http-foundation.git",
-                "reference": "f721924754a12a0b4cecd93176c20f67ff6f8b8f"
+                "reference": "a70c745d4cea48dbd609f4075e5f5cbce453bd52"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/f721924754a12a0b4cecd93176c20f67ff6f8b8f",
-                "reference": "f721924754a12a0b4cecd93176c20f67ff6f8b8f",
+                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/a70c745d4cea48dbd609f4075e5f5cbce453bd52",
+                "reference": "a70c745d4cea48dbd609f4075e5f5cbce453bd52",
                 "shasum": ""
             },
             "require": {
@@ -2657,7 +2797,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-12-19T10:00:43+00:00"
+            "time": "2025-12-23T14:23:49+00:00"
         },
         {
             "name": "symfony/http-kernel",
@@ -3962,10 +4102,82 @@
             "time": "2024-11-21T01:49:47+00:00"
         }
     ],
-    "packages-dev": [],
+    "packages-dev": [
+        {
+            "name": "laravel/pint",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/laravel/pint.git",
+                "reference": "7b9203f1410de2ffd614883f1503a15e32780ebd"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/laravel/pint/zipball/7b9203f1410de2ffd614883f1503a15e32780ebd",
+                "reference": "7b9203f1410de2ffd614883f1503a15e32780ebd",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "ext-mbstring": "*",
+                "ext-tokenizer": "*",
+                "ext-xml": "*",
+                "php": "^8.2.0"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3.90.0",
+                "illuminate/view": "^12.40.1",
+                "larastan/larastan": "^3.8.0",
+                "laravel-zero/framework": "^12.0.4",
+                "mockery/mockery": "^1.6.12",
+                "nunomaduro/termwind": "^2.3.3",
+                "pestphp/pest": "^3.8.4"
+            },
+            "default-branch": true,
+            "bin": [
+                "builds/pint"
+            ],
+            "type": "project",
+            "autoload": {
+                "psr-4": {
+                    "App\\": "app/",
+                    "Database\\Seeders\\": "database/seeders/",
+                    "Database\\Factories\\": "database/factories/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Nuno Maduro",
+                    "email": "enunomaduro@gmail.com"
+                }
+            ],
+            "description": "An opinionated code formatter for PHP.",
+            "homepage": "https://laravel.com",
+            "keywords": [
+                "dev",
+                "format",
+                "formatter",
+                "lint",
+                "linter",
+                "php"
+            ],
+            "support": {
+                "issues": "https://github.com/laravel/pint/issues",
+                "source": "https://github.com/laravel/pint"
+            },
+            "time": "2025-11-26T02:53:36+00:00"
+        }
+    ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {},
+    "stability-flags": {
+        "laravel/pint": 20,
+        "spatie/laravel-route-discovery": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
