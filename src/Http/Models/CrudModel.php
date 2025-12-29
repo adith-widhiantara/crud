@@ -4,7 +4,7 @@ namespace Adithwidhiantara\Crud\Http\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-abstract class ModelCrud extends Model
+abstract class CrudModel extends Model
 {
     protected $guarded = [];
 

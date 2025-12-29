@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Adithwidhiantara\Crud\Http\Services;
 
-use Adithwidhiantara\Crud\Http\Models\ModelCrud;
+use Adithwidhiantara\Crud\Http\Models\CrudModel;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 abstract class BaseCrudService
 {
-    abstract public function model(): ModelCrud;
+    abstract public function model(): CrudModel;
 
     public function getAll(int $perPage, int $page, bool $showAll): Collection|LengthAwarePaginator
     {
@@ -34,17 +34,17 @@ abstract class BaseCrudService
             ->paginate(perPage: $perPage, columns: $columns, page: $page);
     }
 
-    public function create(array $data): ModelCrud
+    public function create(array $data): CrudModel
     {
         return $this->model()->query()->create($data);
     }
 
-    public function find(string|int $id): ModelCrud
+    public function find(string|int $id): CrudModel
     {
         return $this->model()->query()->findOrFail($id);
     }
 
-    public function update(string|int $id, array $data): ModelCrud
+    public function update(string|int $id, array $data): CrudModel
     {
         $model = $this->find($id);
 
