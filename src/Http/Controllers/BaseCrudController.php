@@ -49,9 +49,10 @@ abstract class BaseCrudController extends BaseController implements CrudControll
 
     public function store(StoreRequestContract $request): JsonResponse
     {
+        /** @var CrudRequest $request */
         return Response::json([
             'message' => 'success',
-            'data' => $this->service()->create($request->toArray()),
+            'data' => $this->service()->create($request->validated()),
         ]);
     }
 
@@ -65,7 +66,7 @@ abstract class BaseCrudController extends BaseController implements CrudControll
         /** @var CrudRequest $request */
         return Response::json([
             'message' => 'success',
-            'data' => $this->service()->update($id, $request->toArray()),
+            'data' => $this->service()->update($id, $request->validated()),
         ]);
     }
 
