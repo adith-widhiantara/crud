@@ -2,10 +2,14 @@
 
 namespace Adithwidhiantara\Crud;
 
+use Adithwidhiantara\Crud\Attributes\Endpoint;
 use Adithwidhiantara\Crud\Http\Controllers\BaseCrudController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
 use ReflectionClass;
+use ReflectionMethod;
+use ReflectionNamedType;
 use SplFileInfo;
 use Symfony\Component\Finder\Finder;
 
@@ -59,33 +63,103 @@ class CrudServiceProvider extends ServiceProvider
         $finder = new Finder;
         $finder->files()->in($controllerPath)->name('*.php');
 
-        Route::middleware('api') // Default ke 'api' middleware
-            ->prefix('api')      // Default prefix '/api'
+        Route::middleware('api')
+            ->prefix('api')
             ->group(function () use ($finder) {
-
                 foreach ($finder as $file) {
                     $className = $this->getClassFromFile($file);
 
-                    // Cek apakah class valid dan extend BaseCrudController
+                    // 3. Validasi Class: Harus ada, bukan abstrak, dan extend BaseCrudController
                     if (
-                        $className &&
-                        class_exists($className) &&
-                        is_subclass_of($className, BaseCrudController::class) &&
-                        ! (new ReflectionClass($className))->isAbstract()
+                        ! $className ||
+                        ! class_exists($className) ||
+                        ! is_subclass_of($className, BaseCrudController::class) ||
+                        (new ReflectionClass($className))->isAbstract()
                     ) {
-                        // Instantiate controller untuk akses method getRouteKeyName
-                        // Kita pakai app()->make agar dependency injection tetap jalan jika ada constructor
-                        $controllerInstance = app($className);
-
-                        // Ambil slug, misal: 'products'
-                        $slug = $controllerInstance->getRouteKeyName();
-
-                        // Register Route: GET, POST, PUT, DELETE
-                        // /api/products
-                        Route::apiResource($slug, $className);
+                        continue;
                     }
+
+                    // Instantiate dummy controller untuk ambil base slug (misal: 'products')
+                    $controllerInstance = app($className);
+                    $baseSlug = $controllerInstance->getRouteKeyName();
+
+                    // --- LOGIC CUSTOM ROUTE DISCOVERY ---
+                    $this->registerCustomMethods($className, $baseSlug);
+
+                    // --- LOGIC STANDARD CRUD ROUTE ---
+                    // Didaftarkan TERAKHIR agar wildcard {id} tidak menimpa custom route
+                    Route::apiResource($baseSlug, $className);
                 }
             });
+    }
+
+    protected function registerCustomMethods(string $className, string $baseSlug): void
+    {
+        $reflector = new ReflectionClass($className);
+        $methods = $reflector->getMethods(ReflectionMethod::IS_PUBLIC);
+
+        // Method bawaan yang harus di-skip agar tidak didaftarkan ulang
+        $ignoredMethods = [
+            'index', 'store', 'show', 'update', 'destroy',
+            'service', 'model', 'getRouteKeyName', '__construct',
+        ];
+
+        foreach ($methods as $method) {
+            $methodName = $method->getName();
+
+            // Filter 1: Skip method bawaan & method milik parent (kecuali di-override)
+            if (in_array($methodName, $ignoredMethods) || $method->class !== $className) {
+                continue;
+            }
+
+            // Default Values
+            $httpMethods = ['GET'];
+            $uriSegment = Str::kebab($methodName);
+            $isCustomUri = false;
+
+            // Cek Attribute #[Endpoint]
+            $attributes = $method->getAttributes(Endpoint::class);
+            if (! empty($attributes)) {
+                $attributeInstance = $attributes[0]->newInstance();
+
+                // Override Method (POST/PUT/dll)
+                $httpMethods = (array) $attributeInstance->method;
+
+                // Override URI jika user mendefinisikan
+                if ($attributeInstance->uri) {
+                    $uriSegment = $attributeInstance->uri;
+                    $isCustomUri = true;
+                }
+            }
+
+            // Logic Auto-Params:
+            // Jika user TIDAK set URI manual, kita generate params otomatis dari function arguments.
+            // Contoh: public function test($id) -> /test/{id}
+            if (! $isCustomUri) {
+                $routeParams = [];
+                foreach ($method->getParameters() as $param) {
+                    $type = $param->getType();
+
+                    // Skip Dependency Injection (Class Object seperti Request)
+                    if ($type instanceof ReflectionNamedType && ! $type->isBuiltin()) {
+                        continue;
+                    }
+
+                    // Masukkan Primitive Type (string, int) ke URL
+                    $routeParams[] = '{'.$param->getName().'}';
+                }
+
+                if (! empty($routeParams)) {
+                    $uriSegment .= '/'.implode('/', $routeParams);
+                }
+            }
+
+            // Register Route Akhir
+            // URL: /api/products/custom-method/{param}
+            $fullPath = $baseSlug.'/'.$uriSegment;
+
+            Route::match($httpMethods, $fullPath, [$className, $methodName]);
+        }
     }
 
     /**
