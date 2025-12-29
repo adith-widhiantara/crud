@@ -2,7 +2,13 @@
 
 namespace Adithwidhiantara\Crud\Requests;
 
-abstract class CrudRequest
+use Adithwidhiantara\Crud\Contracts\StoreRequestContract;
+use Illuminate\Foundation\Http\FormRequest;
+
+abstract class CrudRequest extends FormRequest implements StoreRequestContract, UpdateRequestContract
 {
-    //
+    public function rules(): array
+    {
+        return [];
+    }
 }
