@@ -9,10 +9,20 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Str;
 use Spatie\RouteDiscovery\Attributes\Route;
 
 abstract class BaseCrudController extends BaseController
 {
+    public function getRouteKeyName(): string
+    {
+        $model = $this->service()->model();
+
+        $modelName = class_basename($model);
+
+        return Str::plural(Str::kebab($modelName));
+    }
+
     public function index(): JsonResponse
     {
         return Response::json($this->service()->getAll());
