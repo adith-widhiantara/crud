@@ -23,9 +23,13 @@ abstract class BaseCrudController extends BaseController
         return Str::plural(Str::kebab($modelName));
     }
 
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        return Response::json($this->service()->getAll());
+        $perPage = (int) $request->query('per_page', 10);
+        $page = (int) $request->query('page', 0);
+        $showAll = (bool) $request->query('show_all', false);
+
+        return Response::json($this->service()->getAll(perPage: $perPage, page: $page, showAll: $showAll));
     }
 
     abstract protected function service(): BaseCrudService;

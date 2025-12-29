@@ -5,17 +5,23 @@ declare(strict_types=1);
 namespace Adithwidhiantara\Crud\Http\Services;
 
 use Adithwidhiantara\Crud\Http\Models\ModelCrud;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 abstract class BaseCrudService
 {
     abstract public function model(): ModelCrud;
 
-    public function getAll(): Collection|LengthAwarePaginator
+    public function getAll(int $perPage, int $page, bool $showAll): Collection|LengthAwarePaginator
     {
+        $columns = $this->model()->showOnList;
+
+        if ($showAll) {
+            return $this->model()->query()->get($columns);
+        }
+
         return $this->model()->query()
-            ->get($this->model()->showOnList);
+            ->paginate(perPage: $perPage, columns: $columns, page: $page);
     }
 
     public function create(array $data): ModelCrud
