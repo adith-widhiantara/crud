@@ -5,16 +5,28 @@ declare(strict_types=1);
 namespace Adithwidhiantara\Crud\Http\Controllers;
 
 use Adithwidhiantara\Crud\Contracts\CrudControllerContract;
+use Adithwidhiantara\Crud\Contracts\StoreRequestContract;
+use Adithwidhiantara\Crud\Contracts\UpdateRequestContract;
 use Adithwidhiantara\Crud\Http\Services\BaseCrudService;
+use Adithwidhiantara\Crud\Requests\CrudRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Str;
-use Spatie\RouteDiscovery\Attributes\Route;
 
 abstract class BaseCrudController extends BaseController implements CrudControllerContract
 {
+    protected string $storeRequest = CrudRequest::class;
+
+    protected string $updateRequest = CrudRequest::class;
+
+    public function __construct()
+    {
+        app()->bind(StoreRequestContract::class, $this->storeRequest);
+        app()->bind(UpdateRequestContract::class, $this->updateRequest);
+    }
+
     public function getRouteKeyName(): string
     {
         $model = $this->service()->model();
@@ -35,7 +47,7 @@ abstract class BaseCrudController extends BaseController implements CrudControll
 
     abstract protected function service(): BaseCrudService;
 
-    public function store(Request $request): JsonResponse
+    public function store(StoreRequestContract $request): JsonResponse
     {
         return Response::json([
             'message' => 'success',
@@ -43,22 +55,20 @@ abstract class BaseCrudController extends BaseController implements CrudControll
         ]);
     }
 
-    #[Route(uri: '{id}')]
     public function show(string|int $id): JsonResponse
     {
         return Response::json($this->service()->find($id));
     }
 
-    #[Route(uri: '{id}')]
-    public function update(Request $request, string|int $id): JsonResponse
+    public function update(UpdateRequestContract $request, string|int $id): JsonResponse
     {
+        /** @var CrudRequest $request */
         return Response::json([
             'message' => 'success',
             'data' => $this->service()->update($id, $request->toArray()),
         ]);
     }
 
-    #[Route(uri: '{id}')]
     public function destroy(string|int $id): JsonResponse
     {
         $this->service()->delete($id);
