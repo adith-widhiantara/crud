@@ -16,6 +16,16 @@ abstract class BaseCrudService
     {
         $columns = $this->model()->showOnList;
 
+        if ($perPage < 1) {
+            $perPage = 10;
+        }
+        if ($perPage > 100) {
+            $perPage = 100;
+        }
+        if ($page < 1) {
+            $page = 1;
+        }
+
         if ($showAll) {
             return $this->model()->query()->get($columns);
         }
