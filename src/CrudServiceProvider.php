@@ -54,6 +54,8 @@ class CrudServiceProvider extends ServiceProvider
         }
 
         $controllerPath = config('crud.controllers_path') ?? app_path('Http/Controllers');
+        $middleware = config('crud.middleware') ?? ['api'];
+        $prefix = config('crud.prefix') ?? 'api';
 
         if (! is_dir($controllerPath)) {
             return;
@@ -63,8 +65,8 @@ class CrudServiceProvider extends ServiceProvider
         $finder = new Finder;
         $finder->files()->in($controllerPath)->name('*.php');
 
-        Route::middleware('api')
-            ->prefix('api')
+        Route::middleware($middleware)
+            ->prefix($prefix)
             ->group(function () use ($finder) {
                 foreach ($finder as $file) {
                     $className = $this->getClassFromFile($file);
