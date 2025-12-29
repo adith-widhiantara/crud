@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c8668b233bd259927b8f190bd8a81ddd",
+    "content-hash": "8cf137e7eb55bf3c53dc6baba86ca642",
     "packages": [
         {
             "name": "brick/math",
@@ -933,12 +933,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/database.git",
-                "reference": "90e57a3b7d2ae57b00846c6572796b585264927f"
+                "reference": "31cd77c7d64bd34c646ddc8209d8bd90aefc1918"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/illuminate/database/zipball/90e57a3b7d2ae57b00846c6572796b585264927f",
-                "reference": "90e57a3b7d2ae57b00846c6572796b585264927f",
+                "url": "https://api.github.com/repos/illuminate/database/zipball/31cd77c7d64bd34c646ddc8209d8bd90aefc1918",
+                "reference": "31cd77c7d64bd34c646ddc8209d8bd90aefc1918",
                 "shasum": ""
             },
             "require": {
@@ -997,7 +997,7 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
-            "time": "2025-12-22T15:31:12+00:00"
+            "time": "2025-12-28T17:58:19+00:00"
         },
         {
             "name": "illuminate/filesystem",
@@ -1175,6 +1175,56 @@
             "time": "2024-07-23T16:31:01+00:00"
         },
         {
+            "name": "illuminate/pagination",
+            "version": "12.x-dev",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/illuminate/pagination.git",
+                "reference": "87e7e3e7b02d6809b1bcd41782e1ca2c6d2a413b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/illuminate/pagination/zipball/87e7e3e7b02d6809b1bcd41782e1ca2c6d2a413b",
+                "reference": "87e7e3e7b02d6809b1bcd41782e1ca2c6d2a413b",
+                "shasum": ""
+            },
+            "require": {
+                "ext-filter": "*",
+                "illuminate/collections": "^12.0",
+                "illuminate/contracts": "^12.0",
+                "illuminate/support": "^12.0",
+                "php": "^8.2"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "12.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Illuminate\\Pagination\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Taylor Otwell",
+                    "email": "taylor@laravel.com"
+                }
+            ],
+            "description": "The Illuminate Pagination package.",
+            "homepage": "https://laravel.com",
+            "support": {
+                "issues": "https://github.com/laravel/framework/issues",
+                "source": "https://github.com/laravel/framework"
+            },
+            "time": "2025-11-16T14:36:17+00:00"
+        },
+        {
             "name": "illuminate/pipeline",
             "version": "12.x-dev",
             "source": {
@@ -1350,12 +1400,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/session.git",
-                "reference": "c376e4a0dda79a88462e8a7d16cc924aa3eb6e15"
+                "reference": "4dde9c962817dec7bf16d1bb8b17f3f5274d188e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/illuminate/session/zipball/c376e4a0dda79a88462e8a7d16cc924aa3eb6e15",
-                "reference": "c376e4a0dda79a88462e8a7d16cc924aa3eb6e15",
+                "url": "https://api.github.com/repos/illuminate/session/zipball/4dde9c962817dec7bf16d1bb8b17f3f5274d188e",
+                "reference": "4dde9c962817dec7bf16d1bb8b17f3f5274d188e",
                 "shasum": ""
             },
             "require": {
@@ -1399,7 +1449,7 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
-            "time": "2025-10-26T17:11:19+00:00"
+            "time": "2025-12-28T17:35:30+00:00"
         },
         {
             "name": "illuminate/support",
@@ -1407,12 +1457,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/illuminate/support.git",
-                "reference": "82c5c520506618fdbf6eceb1164c770ed722d35a"
+                "reference": "cec6d8feb63eaa2911c345a8353312aa17ed3be0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/illuminate/support/zipball/82c5c520506618fdbf6eceb1164c770ed722d35a",
-                "reference": "82c5c520506618fdbf6eceb1164c770ed722d35a",
+                "url": "https://api.github.com/repos/illuminate/support/zipball/cec6d8feb63eaa2911c345a8353312aa17ed3be0",
+                "reference": "cec6d8feb63eaa2911c345a8353312aa17ed3be0",
                 "shasum": ""
             },
             "require": {
@@ -1479,7 +1529,7 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
-            "time": "2025-12-21T14:15:54+00:00"
+            "time": "2025-12-28T17:36:25+00:00"
         },
         {
             "name": "laravel/serializable-closure",
@@ -1549,12 +1599,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/CarbonPHP/carbon.git",
-                "reference": "33cef4b988018ec199dd88d216c3487ec37f14b8"
+                "reference": "9f177936ec4ad7ba476f5fd0a020c54905192b43"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/CarbonPHP/carbon/zipball/33cef4b988018ec199dd88d216c3487ec37f14b8",
-                "reference": "33cef4b988018ec199dd88d216c3487ec37f14b8",
+                "url": "https://api.github.com/repos/CarbonPHP/carbon/zipball/9f177936ec4ad7ba476f5fd0a020c54905192b43",
+                "reference": "9f177936ec4ad7ba476f5fd0a020c54905192b43",
                 "shasum": ""
             },
             "require": {
@@ -1622,14 +1672,14 @@
                 }
             ],
             "description": "An API extension for DateTime that supports 281 different languages.",
-            "homepage": "https://carbon.nesbot.com",
+            "homepage": "https://carbonphp.github.io/carbon/",
             "keywords": [
                 "date",
                 "datetime",
                 "time"
             ],
             "support": {
-                "docs": "https://carbon.nesbot.com/docs",
+                "docs": "https://carbonphp.github.io/carbon/guide/getting-started/introduction.html",
                 "issues": "https://github.com/CarbonPHP/carbon/issues",
                 "source": "https://github.com/CarbonPHP/carbon"
             },
@@ -1647,7 +1697,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-12-22T20:34:24+00:00"
+            "time": "2025-12-26T09:39:57+00:00"
         },
         {
             "name": "psr/clock",

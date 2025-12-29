@@ -14,7 +14,7 @@ abstract class BaseCrudService
 
     public function getAll(int $perPage, int $page, bool $showAll): Collection|LengthAwarePaginator
     {
-        $columns = $this->model()->showOnList;
+        $columns = $this->model()->getShowOnListColumns();
 
         if ($perPage < 1) {
             $perPage = 10;

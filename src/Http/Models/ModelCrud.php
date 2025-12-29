@@ -8,5 +8,5 @@ abstract class ModelCrud extends Model
 {
     protected $guarded = [];
 
-    public array $showOnList = [];
+    abstract public function getShowOnListColumns(): array;
 }
