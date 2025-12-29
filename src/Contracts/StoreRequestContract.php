@@ -15,4 +15,6 @@ interface StoreRequestContract
     public function merge(array $input);
 
     public function only(array $keys);
+
+    public function authorize();
 }

@@ -11,4 +11,6 @@ interface UpdateRequestContract
     public function input(string $field);
 
     public function rules();
+
+    public function authorize();
 }
