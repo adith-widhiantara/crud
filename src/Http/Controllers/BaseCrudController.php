@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Adithwidhiantara\Crud\Http\Controllers;
 
+use Adithwidhiantara\Crud\Contracts\CrudControllerContract;
 use Adithwidhiantara\Crud\Http\Services\BaseCrudService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -12,7 +13,7 @@ use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Str;
 use Spatie\RouteDiscovery\Attributes\Route;
 
-abstract class BaseCrudController extends BaseController
+abstract class BaseCrudController extends BaseController implements CrudControllerContract
 {
     public function getRouteKeyName(): string
     {

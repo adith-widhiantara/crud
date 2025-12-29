@@ -1,36 +1,40 @@
 {
-    "name": "adithwidhiantara/crud",
-    "description": "Generate Simple CRUD",
-    "type": "package",
-    "license": "MIT",
-    "autoload": {
-        "psr-4": {
-            "Adithwidhiantara\\Crud\\": "src/"
-        }
-    },
-    "extra": {
-        "laravel": {
-            "providers": [
-                "Adithwidhiantara\\Crud\\CrudServiceProvider"
-            ]
-        }
-    },
-    "authors": [
-        {
-            "name": "Adith Widhiantara"
-        }
-    ],
-    "minimum-stability": "dev",
-    "require": {
-        "php": "^8.2",
-        "illuminate/http": "^11.0|^12.0",
-        "illuminate/routing": "^11.0|^12.0",
-        "illuminate/database": "^11.0|^12.0",
-        "illuminate/support": "^11.0|^12.0",
-        "illuminate/pagination": "^11.0|^12.0",
-        "spatie/laravel-route-discovery": "dev-main"
-    },
-    "require-dev": {
-        "laravel/pint": "dev-main"
+  "name": "adithwidhiantara/crud",
+  "description": "Generate Simple CRUD",
+  "type": "package",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "Adithwidhiantara\\Crud\\": "src/"
     }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Adithwidhiantara\\Crud\\CrudServiceProvider"
+      ]
+    }
+  },
+  "authors": [
+    {
+      "name": "Adith Widhiantara"
+    }
+  ],
+  "minimum-stability": "dev",
+  "require": {
+    "php": "^8.2",
+    "illuminate/database": "^11.0|^12.0",
+    "illuminate/http": "^11.0|^12.0",
+    "illuminate/pagination": "^11.0|^12.0",
+    "illuminate/routing": "^11.0|^12.0",
+    "illuminate/support": "^11.0|^12.0"
+  },
+  "require-dev": {
+    "laravel/pint": "dev-main"
+  },
+  "config": {
+    "platform": {
+      "php": "8.2"
+    }
+  }
 }
