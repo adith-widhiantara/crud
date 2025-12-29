@@ -4,30 +4,31 @@ declare(strict_types=1);
 
 namespace Adithwidhiantara\Crud\Http\Services;
 
+use Adithwidhiantara\Crud\Http\Models\ModelCrud;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
 
 abstract class BaseCrudService
 {
-    abstract public function model(): Model;
+    abstract public function model(): ModelCrud;
 
     public function getAll(): Collection|LengthAwarePaginator
     {
-        return $this->model()->all();
+        return $this->model()->query()
+            ->get($this->model()->showOnList);
     }
 
-    public function create(array $data): Model
+    public function create(array $data): ModelCrud
     {
         return $this->model()->query()->create($data);
     }
 
-    public function find(string|int $id): Model
+    public function find(string|int $id): ModelCrud
     {
         return $this->model()->query()->findOrFail($id);
     }
 
-    public function update(string|int $id, array $data): Model
+    public function update(string|int $id, array $data): ModelCrud
     {
         $model = $this->find($id);
 
