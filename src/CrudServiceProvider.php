@@ -16,7 +16,11 @@ class CrudServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // 1. Merge Config (Penting agar default value tetap jalan)
+        // Pastikan path-nya mengarah ke file config/crud.php yang baru dibuat
+        $this->mergeConfigFrom(
+            __DIR__.'/../config/crud.php', 'crud'
+        );
     }
 
     /**
@@ -25,6 +29,11 @@ class CrudServiceProvider extends ServiceProvider
     public function boot(): void
     {
         if ($this->app->runningInConsole()) {
+            // Allow user to publish config file
+            $this->publishes([
+                __DIR__.'/../config/crud.php' => config_path('crud.php'),
+            ], 'crud-config');
+
             // $this->commands([...]);
         }
 
@@ -40,7 +49,7 @@ class CrudServiceProvider extends ServiceProvider
             return;
         }
 
-        $controllerPath = app_path('Http/Controllers');
+        $controllerPath = config('crud.controllers_path') ?? app_path('Http/Controllers');
 
         if (! is_dir($controllerPath)) {
             return;
