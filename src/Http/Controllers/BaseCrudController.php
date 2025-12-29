@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Adithwidhiantara\Crud\Http\Controllers;
 
-use Illuminate\Database\Eloquent\Model;
+use Adithwidhiantara\Crud\Http\Services\BaseCrudService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
@@ -13,54 +13,40 @@ use Spatie\RouteDiscovery\Attributes\Route;
 
 abstract class BaseCrudController extends BaseController
 {
-    abstract protected function model(): Model;
-
-    // oke trye
-
     public function index(): JsonResponse
     {
-        return Response::json($this->model()->all());
+        return Response::json($this->service()->getAll());
     }
+
+    abstract protected function service(): BaseCrudService;
 
     public function store(Request $request): JsonResponse
     {
-        $createdData = $this->model()
-            ->query()
-            ->create($request->toArray());
-
         return Response::json([
             'message' => 'success',
-            'data' => $createdData,
+            'data' => $this->service()->create($request->toArray()),
         ]);
     }
 
     #[Route(uri: '{id}')]
     public function show(string|int $id): JsonResponse
     {
-        return Response::json($this->model()->query()->findOrFail($id));
+        return Response::json($this->service()->find($id));
     }
 
     #[Route(uri: '{id}')]
     public function update(Request $request, string|int $id): JsonResponse
     {
-        $updatedData = $this->model()
-            ->query()
-            ->where('id', $id)
-            ->update($request->toArray());
-
         return Response::json([
             'message' => 'success',
-            'data' => $updatedData,
+            'data' => $this->service()->update($id, $request->toArray()),
         ]);
     }
 
     #[Route(uri: '{id}')]
     public function destroy(string|int $id): JsonResponse
     {
-        $this->model()
-            ->query()
-            ->where('id', $id)
-            ->delete();
+        $this->service()->delete($id);
 
         return Response::json([
             'message' => 'success',
