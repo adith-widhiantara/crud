@@ -75,7 +75,7 @@ abstract class BaseCrudController extends BaseController implements CrudControll
 
     public function destroy(string|int $id): JsonResponse
     {
-        $this->service()->delete($id);
+        $this->service()->delete([$id]);
 
         return Response::json([
             'message' => 'success',

@@ -82,11 +82,21 @@ abstract class BaseCrudService
         return $this->afterUpdateHook($model);
     }
 
-    public function delete(string|int $id): bool
+    public function beforeDeleteHook(array $ids): array
     {
-        $model = $this->find($id);
+        return $ids;
+    }
 
-        return $model->delete();
+    public function afterDeleteHook(int $ids): int
+    {
+        return $ids;
+    }
+
+    public function delete(array $ids): int
+    {
+        $finalData = $this->beforeDeleteHook($ids);
+
+        return $this->afterDeleteHook($this->model()->destroy($finalData));
     }
 
     /**
@@ -117,7 +127,7 @@ abstract class BaseCrudService
 
             if (! empty($data['delete']) && is_array($data['delete'])) {
                 // destroy() bisa menerima array ID sekaligus
-                $deletedCount = $this->model()->destroy($data['delete']);
+                $deletedCount = $this->delete($data['delete']);
                 $summary['deleted'] = $deletedCount;
             }
 
