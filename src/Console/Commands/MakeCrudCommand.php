@@ -36,9 +36,9 @@ class MakeCrudCommand extends Command
         $this->generateUnitTest($name);
 
         $this->info("CRUD for {$name} generated successfully! 🚀");
-        $this->comment("Don't forget to run 'php artisan migrate' if you haven't created the table.");
+        $this->comment("Don't forget to run 'php artisan migrate'.");
 
-        return 1;
+        return self::SUCCESS; // Return 0 biasanya standar untuk Sukses
     }
 
     protected function generateModel(string $name): void
@@ -176,7 +176,6 @@ PHP;
 
     protected function generateUnitTest(string $name): void
     {
-        // Pastikan direktori Unit Test ada
         $directory = base_path('tests/Feature');
         if (! File::exists($directory)) {
             File::makeDirectory($directory, 0755, true);
@@ -190,21 +189,87 @@ PHP;
             return;
         }
 
+        $routeSlug = Str::plural(Str::kebab($name)); // Product -> products
+        $modelClass = "App\\Models\\{$name}";
+
+        // Perbaikan: Namespace standar Laravel 'Tests\Feature'
+        // Fitur: Langsung generate 5 method test utama
         $content = <<<PHP
 <?php
 
-namespace Feature;
+namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use {$modelClass};
 
 class {$name}ControllerTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected string \$endpoint = '/api/{$routeSlug}';
+
+    public function test_can_get_list_of_{$routeSlug}(): void
+    {
+        {$name}::factory()->count(3)->create();
+
+        \$response = \$this->getJson(\$this->endpoint);
+
+        \$response->assertStatus(200)
+                 ->assertJsonStructure(['data']);
+    }
+
+    public function test_can_store_new_{$routeSlug}(): void
+    {
+        \$data = {$name}::factory()->make()->toArray();
+
+        \$response = \$this->postJson(\$this->endpoint, \$data);
+
+        \$response->assertStatus(200)
+                 ->assertJson(['message' => 'success']);
+        
+        // Pastikan data masuk database
+        \$this->assertDatabaseHas((new {$name})->getTable(), \$data);
+    }
+
+    public function test_can_show_detail_{$routeSlug}(): void
+    {
+        \$model = {$name}::factory()->create();
+
+        \$response = \$this->getJson(\$this->endpoint . '/' . \$model->id);
+
+        \$response->assertStatus(200)
+                 ->assertJson(['id' => \$model->id]);
+    }
+
+    public function test_can_update_{$routeSlug}(): void
+    {
+        \$model = {$name}::factory()->create();
+        \$newData = {$name}::factory()->make()->toArray();
+
+        \$response = \$this->putJson(\$this->endpoint . '/' . \$model->id, \$newData);
+
+        \$response->assertStatus(200)
+                 ->assertJson(['message' => 'success']);
+
+        \$this->assertDatabaseHas((new {$name})->getTable(), \$newData);
+    }
+
+    public function test_can_delete_{$routeSlug}(): void
+    {
+        \$model = {$name}::factory()->create();
+
+        \$response = \$this->deleteJson(\$this->endpoint . '/' . \$model->id);
+
+        \$response->assertStatus(200)
+                 ->assertJson(['message' => 'success']);
+
+        \$this->assertDatabaseMissing((new {$name})->getTable(), ['id' => \$model->id]);
+    }
 }
 PHP;
 
         File::put($path, $content);
-        $this->info("✅ Controller created: tests/Feature/{$name}ControllerTest.php");
+        $this->info("✅ Unit Test created: tests/Feature/{$name}ControllerTest.php");
     }
 }
