@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Adithwidhiantara\Crud\Http\Services;
 
-use Adithwidhiantara\Crud\Contracts\StoreRequestContract;
-use Adithwidhiantara\Crud\Contracts\UpdateRequestContract;
 use Adithwidhiantara\Crud\Http\Models\CrudModel;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -38,9 +36,9 @@ abstract class BaseCrudService
             ->paginate(perPage: $perPage, columns: $columns, page: $page);
     }
 
-    public function beforeCreateHook(StoreRequestContract $data): array
+    public function beforeCreateHook(array $data): array
     {
-        return $data->validated();
+        return $data;
     }
 
     public function afterCreateHook(CrudModel $model): CrudModel
@@ -48,10 +46,12 @@ abstract class BaseCrudService
         return $model;
     }
 
-    public function create(StoreRequestContract $data): CrudModel
+    public function create(array $data): CrudModel
     {
+        $finalData = $this->beforeCreateHook($data);
+
         /** @var CrudModel $result */
-        $result = $this->model()->query()->create($this->beforeCreateHook($data));
+        $result = $this->model()->query()->create($finalData);
 
         return $this->afterCreateHook($result);
     }
@@ -61,9 +61,9 @@ abstract class BaseCrudService
         return $this->model()->query()->findOrFail($id);
     }
 
-    public function beforeUpdateHook(UpdateRequestContract $data): array
+    public function beforeUpdateHook(array $data): array
     {
-        return $data->validated();
+        return $data;
     }
 
     public function afterUpdateHook(CrudModel $model): CrudModel
@@ -71,11 +71,13 @@ abstract class BaseCrudService
         return $model->refresh();
     }
 
-    public function update(string|int $id, UpdateRequestContract $data): CrudModel
+    public function update(string|int $id, array $data): CrudModel
     {
         $model = $this->find($id);
 
-        $model->update($this->beforeUpdateHook($data));
+        $finalData = $this->beforeUpdateHook($data);
+
+        $model->update($finalData);
 
         return $this->afterUpdateHook($model);
     }
@@ -101,16 +103,14 @@ abstract class BaseCrudService
 
             if (! empty($data['create']) && is_array($data['create'])) {
                 foreach ($data['create'] as $item) {
-                    DB::table($this->model()->getTable())->insert($item);
+                    $this->create($item);
                     $summary['created']++;
                 }
             }
 
             if (! empty($data['update']) && is_array($data['update'])) {
                 foreach ($data['update'] as $id => $attributes) {
-                    DB::table($this->model()->getTable())
-                        ->where('id', $id)
-                        ->update($attributes);
+                    $this->update($id, $attributes);
                     $summary['updated']++;
                 }
             }

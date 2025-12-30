@@ -55,7 +55,7 @@ abstract class BaseCrudController extends BaseController implements CrudControll
         /** @var CrudRequest $request */
         return Response::json([
             'message' => 'success',
-            'data' => $this->service()->create($request),
+            'data' => $this->service()->create($request->validated()),
         ]);
     }
 
@@ -69,7 +69,7 @@ abstract class BaseCrudController extends BaseController implements CrudControll
         /** @var CrudRequest $request */
         return Response::json([
             'message' => 'success',
-            'data' => $this->service()->update($id, $request),
+            'data' => $this->service()->update($id, $request->validated()),
         ]);
     }
 
