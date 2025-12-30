@@ -3,6 +3,7 @@
 namespace Adithwidhiantara\Crud;
 
 use Adithwidhiantara\Crud\Attributes\Endpoint;
+use Adithwidhiantara\Crud\Console\Commands\MakeCrudCommand;
 use Adithwidhiantara\Crud\Http\Controllers\BaseCrudController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
@@ -38,7 +39,9 @@ class CrudServiceProvider extends ServiceProvider
                 __DIR__.'/../config/crud.php' => config_path('crud.php'),
             ], 'crud-config');
 
-            // $this->commands([...]);
+            $this->commands([
+                MakeCrudCommand::class,
+            ]);
         }
 
         // Jalankan auto-discovery route
