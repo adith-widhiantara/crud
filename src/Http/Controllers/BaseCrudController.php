@@ -10,6 +10,7 @@ use Adithwidhiantara\Crud\Contracts\StoreRequestContract;
 use Adithwidhiantara\Crud\Contracts\UpdateRequestContract;
 use Adithwidhiantara\Crud\Http\Services\BaseCrudService;
 use Adithwidhiantara\Crud\Requests\CrudRequest;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
@@ -87,18 +88,54 @@ abstract class BaseCrudController extends BaseController implements CrudControll
     #[Endpoint(method: Endpoint::POST, uri: 'bulk')]
     public function bulk(Request $request): JsonResponse
     {
-        $request->validate([
+        $bulkRules = [
             'create' => ['nullable', 'array'],
             'update' => ['nullable', 'array'],
             'delete' => ['nullable', 'array'],
-        ]);
+            'delete.*' => ['required'],
+        ];
+
+        $storeRules = $this->getRulesFromRequest($this->storeRequest, $request);
+        foreach ($storeRules as $field => $rules) {
+            $bulkRules["create.*.$field"] = $rules;
+        }
+
+        $updateRules = $this->getRulesFromRequest($this->updateRequest, $request);
+        foreach ($updateRules as $field => $rules) {
+            $bulkRules["update.*.$field"] = $rules;
+        }
+
+        $validated = $request->validate($bulkRules);
 
         // Eksekusi Service
-        $result = $this->service()->bulkHandle($request->all());
+        $result = $this->service()->bulkHandle($validated);
 
         return Response::json([
             'message' => 'Bulk operation success',
             'summary' => $result,
         ]);
+    }
+
+    protected function getRulesFromRequest(string $requestClass, Request $currentRequest): array
+    {
+        if (! class_exists($requestClass)) {
+            return [];
+        }
+
+        /** @var FormRequest $formRequest */
+        // Kita instantiate manual kelas Request-nya
+        $formRequest = new $requestClass;
+
+        // [PENTING] Kita inject Route resolver dari request saat ini.
+        // Ini agar logic '$this->route()' di dalam CrudRequest::rules() tetap jalan normal
+        // dan bisa mendeteksi Controller/Model yang sedang aktif.
+        $formRequest->setRouteResolver(fn () => $currentRequest->route());
+        $formRequest->setContainer(app());
+
+        if (method_exists($formRequest, 'rules')) {
+            return $formRequest->rules();
+        }
+
+        return [];
     }
 }
