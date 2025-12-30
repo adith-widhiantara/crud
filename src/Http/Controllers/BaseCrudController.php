@@ -45,7 +45,7 @@ abstract class BaseCrudController extends BaseController implements CrudControll
         return Response::json($this->service()->getAll(perPage: $perPage, page: $page, showAll: $showAll));
     }
 
-    abstract protected function service(): BaseCrudService;
+    abstract public function service(): BaseCrudService;
 
     public function store(StoreRequestContract $request): JsonResponse
     {

@@ -12,4 +12,17 @@ abstract class CrudModel extends Model
     protected $guarded = [];
 
     abstract public function getShowOnListColumns(): array;
+
+    public function ignoredColumns(array $ignoredColumns = []): array
+    {
+        if (method_exists($this, 'getDeletedAtColumn')) {
+            $ignoredColumns[] = $this->getDeletedAtColumn();
+        }
+
+        return array_merge($ignoredColumns, [
+            $this->getKeyName(),
+            $this->getCreatedAtColumn(),
+            $this->getUpdatedAtColumn(),
+        ]);
+    }
 }
