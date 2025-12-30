@@ -7,6 +7,8 @@ namespace Adithwidhiantara\Crud\Http\Services;
 use Adithwidhiantara\Crud\Http\Models\CrudModel;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
+use Throwable;
 
 abstract class BaseCrudService
 {
@@ -58,5 +60,41 @@ abstract class BaseCrudService
         $model = $this->find($id);
 
         return $model->delete();
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function bulkHandle(array $data)
+    {
+        return DB::transaction(function () use ($data) {
+            $summary = [
+                'created' => 0,
+                'updated' => 0,
+                'deleted' => 0,
+            ];
+
+            if (! empty($data['create']) && is_array($data['create'])) {
+                foreach ($data['create'] as $item) {
+                    $this->create($item);
+                    $summary['created']++;
+                }
+            }
+
+            if (! empty($data['update']) && is_array($data['update'])) {
+                foreach ($data['update'] as $id => $attributes) {
+                    $this->update($id, $attributes);
+                    $summary['updated']++;
+                }
+            }
+
+            if (! empty($data['delete']) && is_array($data['delete'])) {
+                // destroy() bisa menerima array ID sekaligus
+                $deletedCount = $this->model()->destroy($data['delete']);
+                $summary['deleted'] = $deletedCount;
+            }
+
+            return $summary;
+        });
     }
 }

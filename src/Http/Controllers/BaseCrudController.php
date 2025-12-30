@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Adithwidhiantara\Crud\Http\Controllers;
 
+use Adithwidhiantara\Crud\Attributes\Endpoint;
 use Adithwidhiantara\Crud\Contracts\CrudControllerContract;
 use Adithwidhiantara\Crud\Contracts\StoreRequestContract;
 use Adithwidhiantara\Crud\Contracts\UpdateRequestContract;
@@ -14,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Str;
+use Throwable;
 
 abstract class BaseCrudController extends BaseController implements CrudControllerContract
 {
@@ -76,6 +78,27 @@ abstract class BaseCrudController extends BaseController implements CrudControll
 
         return Response::json([
             'message' => 'success',
+        ]);
+    }
+
+    /**
+     * @throws Throwable
+     */
+    #[Endpoint(method: Endpoint::POST, uri: 'bulk')]
+    public function bulk(Request $request): JsonResponse
+    {
+        $request->validate([
+            'create' => ['nullable', 'array'],
+            'update' => ['nullable', 'array'],
+            'delete' => ['nullable', 'array'],
+        ]);
+
+        // Eksekusi Service
+        $result = $this->service()->bulkHandle($request->all());
+
+        return Response::json([
+            'message' => 'Bulk operation success',
+            'summary' => $result,
         ]);
     }
 }
