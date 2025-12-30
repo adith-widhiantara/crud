@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Adithwidhiantara\Crud\Http\Services;
 
+use Adithwidhiantara\Crud\Contracts\StoreRequestContract;
+use Adithwidhiantara\Crud\Contracts\UpdateRequestContract;
 use Adithwidhiantara\Crud\Http\Models\CrudModel;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -36,9 +38,22 @@ abstract class BaseCrudService
             ->paginate(perPage: $perPage, columns: $columns, page: $page);
     }
 
-    public function create(array $data): CrudModel
+    public function beforeCreateHook(StoreRequestContract $data): array
     {
-        return $this->model()->query()->create($data);
+        return $data->validated();
+    }
+
+    public function afterCreateHook(CrudModel $model): CrudModel
+    {
+        return $model;
+    }
+
+    public function create(StoreRequestContract $data): CrudModel
+    {
+        /** @var CrudModel $result */
+        $result = $this->model()->query()->create($this->beforeCreateHook($data));
+
+        return $this->afterCreateHook($result);
     }
 
     public function find(string|int $id): CrudModel
@@ -46,13 +61,23 @@ abstract class BaseCrudService
         return $this->model()->query()->findOrFail($id);
     }
 
-    public function update(string|int $id, array $data): CrudModel
+    public function beforeUpdateHook(UpdateRequestContract $data): array
+    {
+        return $data->validated();
+    }
+
+    public function afterUpdateHook(CrudModel $model): CrudModel
+    {
+        return $model->refresh();
+    }
+
+    public function update(string|int $id, UpdateRequestContract $data): CrudModel
     {
         $model = $this->find($id);
 
-        $model->update($data);
+        $model->update($this->beforeUpdateHook($data));
 
-        return $model->refresh();
+        return $this->afterUpdateHook($model);
     }
 
     public function delete(string|int $id): bool
@@ -76,14 +101,16 @@ abstract class BaseCrudService
 
             if (! empty($data['create']) && is_array($data['create'])) {
                 foreach ($data['create'] as $item) {
-                    $this->create($item);
+                    DB::table($this->model()->getTable())->insert($item);
                     $summary['created']++;
                 }
             }
 
             if (! empty($data['update']) && is_array($data['update'])) {
                 foreach ($data['update'] as $id => $attributes) {
-                    $this->update($id, $attributes);
+                    DB::table($this->model()->getTable())
+                        ->where('id', $id)
+                        ->update($attributes);
                     $summary['updated']++;
                 }
             }
