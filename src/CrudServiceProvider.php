@@ -100,7 +100,6 @@ class CrudServiceProvider extends ServiceProvider
         $reflector = new ReflectionClass($className);
         $methods = $reflector->getMethods(ReflectionMethod::IS_PUBLIC);
 
-        // Method bawaan yang harus di-skip agar tidak didaftarkan ulang
         $ignoredMethods = [
             'index', 'store', 'show', 'update', 'destroy',
             'service', 'model', 'getRouteKeyName', '__construct',
@@ -109,45 +108,48 @@ class CrudServiceProvider extends ServiceProvider
         foreach ($methods as $method) {
             $methodName = $method->getName();
 
-            // Filter 1: Skip method bawaan & method milik parent (kecuali di-override)
-            if (in_array($methodName, $ignoredMethods) || $method->class !== $className) {
+            // 1. Skip method standar resource
+            if (in_array($methodName, $ignoredMethods)) {
                 continue;
             }
+
+            // 2. Cek apakah punya Attribute #[Endpoint]
+            $attributes = $method->getAttributes(Endpoint::class);
+            $hasEndpointAttribute = ! empty($attributes);
+
+            // 3. Logic Filter Baru:
+            // Skip jika method ini warisan dari Parent (bukan ditulis di Child)
+            // DAN tidak memiliki attribute #[Endpoint].
+            // Artinya: Method parent yang ada #[Endpoint]-nya (seperti bulk) akan LOLOS.
+            if ($method->class !== $className && ! $hasEndpointAttribute) {
+                continue;
+            }
+
+            // --- Mulai Logic Ekstraksi Route ---
 
             // Default Values
             $httpMethods = ['GET'];
             $uriSegment = Str::kebab($methodName);
             $isCustomUri = false;
 
-            // Cek Attribute #[Endpoint]
-            $attributes = $method->getAttributes(Endpoint::class);
-            if (! empty($attributes)) {
+            if ($hasEndpointAttribute) {
                 $attributeInstance = $attributes[0]->newInstance();
 
-                // Override Method (POST/PUT/dll)
                 $httpMethods = (array) $attributeInstance->method;
 
-                // Override URI jika user mendefinisikan
                 if ($attributeInstance->uri) {
                     $uriSegment = $attributeInstance->uri;
                     $isCustomUri = true;
                 }
             }
 
-            // Logic Auto-Params:
-            // Jika user TIDAK set URI manual, kita generate params otomatis dari function arguments.
-            // Contoh: public function test($id) -> /test/{id}
             if (! $isCustomUri) {
                 $routeParams = [];
                 foreach ($method->getParameters() as $param) {
                     $type = $param->getType();
-
-                    // Skip Dependency Injection (Class Object seperti Request)
                     if ($type instanceof ReflectionNamedType && ! $type->isBuiltin()) {
                         continue;
                     }
-
-                    // Masukkan Primitive Type (string, int) ke URL
                     $routeParams[] = '{'.$param->getName().'}';
                 }
 
@@ -156,8 +158,9 @@ class CrudServiceProvider extends ServiceProvider
                 }
             }
 
-            // Register Route Akhir
-            // URL: /api/products/custom-method/{param}
+            // Register Route
+            // Karena 'bulk' didefinisikan di parent, dia akan otomatis tersedia
+            // untuk SEMUA controller turunannya.
             $fullPath = $baseSlug.'/'.$uriSegment;
 
             Route::match($httpMethods, $fullPath, [$className, $methodName]);
