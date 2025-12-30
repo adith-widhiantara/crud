@@ -56,6 +56,12 @@ class MakeCrudCommand extends Command
             return;
         }
 
+        // make factory
+        $this->call('make:factory', [
+            'name' => $name.'Factory',
+            '--model' => $name,
+        ]);
+
         $content = <<<PHP
 <?php
 
@@ -73,7 +79,7 @@ class {$name} extends CrudModel
 PHP;
 
         File::put($path, $content);
-        $this->info("✅ Model created: app/Models/{$name}.php");
+        $this->info("✅ Model & Factory created: app/Models/{$name}.php");
     }
 
     protected function generateService(string $name): void
