@@ -8,6 +8,7 @@ use Adithwidhiantara\Crud\Http\Models\CrudModel;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use InvalidArgumentException;
 use Throwable;
 
 abstract class BaseCrudService
@@ -16,7 +17,9 @@ abstract class BaseCrudService
 
     public function getAll(int $perPage, int $page, bool $showAll): Collection|LengthAwarePaginator
     {
-        $columns = $this->model()->getShowOnListColumns();
+        $rawColumns = $this->model()->getShowOnListColumns();
+
+        [$localColumns, $relations] = $this->parseColumnsAndRelations($rawColumns);
 
         if ($perPage < 1) {
             $perPage = 10;
@@ -28,12 +31,50 @@ abstract class BaseCrudService
             $page = 1;
         }
 
-        if ($showAll) {
-            return $this->model()->query()->get($columns);
+        $query = $this->model()->query();
+
+        foreach ($relations as $relationName => $cols) {
+            if (! in_array('id', $cols)) {
+                $cols[] = 'id';
+            }
+
+            $query->with($relationName.':'.implode(',', $cols));
         }
 
-        return $this->model()->query()
-            ->paginate(perPage: $perPage, columns: $columns, page: $page);
+        if ($showAll) {
+            return $query->get($localColumns);
+        }
+
+        return $query->paginate(perPage: $perPage, columns: $localColumns, page: $page);
+    }
+
+    /**
+     * @throws Throwable
+     */
+    protected function parseColumnsAndRelations(array $columns): array
+    {
+        $local = [];
+        $relations = [];
+
+        foreach ($columns as $column) {
+            if (str_contains($column, '.')) {
+                [$relation, $field] = explode('.', $column, 2);
+
+                throw_if($field === '*', new InvalidArgumentException(
+                    'Please define specific columns to avoid "SELECT *".'
+                ));
+
+                $relations[$relation][] = $field;
+            } else {
+                $local[] = $column;
+            }
+        }
+
+        throw_if(empty($local), new InvalidArgumentException(
+            'No local columns specified in getShowOnListColumns(). Please define specific columns to avoid "SELECT *".'
+        ));
+
+        return [$local, $relations];
     }
 
     public function beforeCreateHook(array $data): array

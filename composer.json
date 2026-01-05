@@ -36,6 +36,12 @@
   },
   "require-dev": {
     "laravel/pint": "dev-main",
-    "orchestra/testbench": "^9.0"
+    "orchestra/testbench": "^9.0",
+    "phpunit/phpunit": "^11.5"
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Adithwidhiantara\\Crud\\Tests\\": "tests/"
+    }
   }
 }
