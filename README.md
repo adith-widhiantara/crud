@@ -146,6 +146,42 @@ Your models (extending CrudModel) have two powerful methods to control the API o
 If you have sensitive columns (like api_token, password_hash, is_admin) or calculated columns that should NOT be
 validated or accepted from the Request payload, override this method.
 
+Here is the English translation for your documentation:
+
+### Defining Columns & Relations (Strict Mode)
+
+In `BaseCrudService`, you are required to define which columns to display by implementing the `getShowOnListColumns()`
+method.
+
+**Important:** Starting from this version, **Strict Mode** is enforced. You **must** define at least one column from the
+main table. If you intend to select all columns, you must explicitly specify it as `['*']`. The system will throw an
+`InvalidArgumentException` if no local columns are defined to prevent accidental `SELECT *` queries.
+
+#### Auto-Load Relations
+
+You can define columns from related tables using the *dot-notation* format (`relation.column`). The service will
+automatically handle efficient *Eager Loading* (Partial Select).
+
+Implementation example in your Service:
+
+```php
+public function getShowOnListColumns(): array
+{
+    return [
+        // Local Columns (At least one is required)
+        'id',
+        'title',
+        'status',
+        
+        // Relations (Automatically loaded via Eager Loading)
+        // Syntax: 'relation_name.column_name'
+        'author.name',    // Will execute: with('author:id,name')
+        'category.slug',  // Will execute: with('category:id,slug')
+    ];
+}
+
+```
+
 ### 🪝 Service Hooks
 
 You can intervene in the CRUD process by overriding hooks in your **Service** class (
