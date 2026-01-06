@@ -235,7 +235,7 @@ protected function extendQuery(Builder $query): Builder
 
 ```
 
-### Defining Columns & Relations (Strict Mode)
+### 🏗️ Defining Columns & Relations (Strict Mode)
 
 In `BaseCrudService`, you are required to define which columns to display by implementing the `getShowOnListColumns()`
 method.
