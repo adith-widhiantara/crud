@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.2.0 | 2025-01-06
+
+### Added
+
+- **Filtering System**: Menambahkan method `filterableColumns()` pada `CrudModel` untuk whitelist kolom yang aman
+  difilter via query string (support exact match, `null`, `!null`, dan array `whereIn`).
+- **Advanced Search**: Menambahkan method `searchableColumns()` pada `CrudModel` untuk pencarian global fuzzy (
+  `LIKE %...%`).
+- **Nested Relation Search**: Fitur search mendukung dot notation (contoh: `category.name`, `posts.comments.body`) untuk
+  mencari data di dalam relasi.
+- **Query Hook**: Menambahkan method `extendQuery(Builder $query)` pada `BaseCrudService` untuk mempermudah modifikasi
+  query (seperti scoping atau sorting custom) tanpa meng-override `getAll`.
+- **API Parameters**: Endpoint `index` sekarang menerima parameter `filter[...]` dan `search`.
+
+### Changed
+
+- Method `getAll` pada `BaseCrudService` dan `BaseCrudController` kini menerima argumen tambahan `$filter` dan
+  `$search`.
+
 ## 1.1.0 | 2025-01-05
 
 ### Added

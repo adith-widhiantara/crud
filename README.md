@@ -148,6 +148,93 @@ validated or accepted from the Request payload, override this method.
 
 Here is the English translation for your documentation:
 
+### 🔍 Filtering & Searching
+
+This package provides secure (whitelisted) and powerful filtering and searching features out-of-the-box.
+
+#### 1. Filtering (Exact Match)
+
+You can filter query results based on specific columns. By default, **no columns are filterable** for security reasons.
+You must register them in your Model.
+
+**In Model (`App\Models\Product.php`):**
+
+```php
+public function filterableColumns(): array
+{
+    // Define columns allowed to be filtered by the user
+    return ['status', 'category_id', 'author_id'];
+}
+
+```
+
+**API Usage:**
+
+* **Single Value:** `/api/products?filter[status]=active`
+  *(Query: `WHERE status = 'active'`)*
+* **Multiple Values (Where In):** `/api/products?filter[category_id][]=1&filter[category_id][]=5`
+  *(Query: `WHERE category_id IN (1, 5)`)*
+* **Null Checks:** `/api/products?filter[author_id]=null` or `!null`
+  *(Query: `WHERE author_id IS NULL`)*
+
+---
+
+#### 2. Global Search (Fuzzy Logic)
+
+The search feature allows text searching (`LIKE %keyword%`) across multiple columns simultaneously using `OR` logic. You
+can even search within **Relationships** (Nested Relations).
+
+**In Model (`App\Models\Product.php`):**
+
+```php
+public function searchableColumns(): array
+{
+    return [
+        'name',             // Search in products table, name column
+        'sku',
+        'category.name',    // Search in 'category' relationship, name column
+        'tags.title',       // Search in 'tags' relationship, title column
+    ];
+}
+
+```
+
+**API Usage:**
+
+* **Search:** `/api/products?search=laptop`
+  *(Logic: Search for products where `name` contains "laptop" **OR** `sku` contains "laptop" **OR** category name
+  contains "laptop")*
+
+> **Note:** The Search logic is wrapped within a parameter grouping `AND (...)` so it will not interfere with other
+> active filters.
+
+---
+
+#### 3. Custom Query (ExtendQuery Hook)
+
+If you require more complex query logic (such as default sorting, user global scopes, or manual joins) without having to
+override the `getAll` method, use the `extendQuery` hook in your Service.
+
+**In Service (`App\Http\Services\ProductService.php`):**
+
+```php
+use Illuminate\Database\Eloquent\Builder;
+
+protected function extendQuery(Builder $query): Builder
+{
+    // Example: Default sort by newest
+    $query->orderBy('created_at', 'desc');
+
+    // Example: Only show data belonging to the logged-in user (if not admin)
+    if (!auth()->user()->isAdmin()) {
+        $query->where('user_id', auth()->id());
+    }
+    
+    return $query;
+}
+
+```
+
 ### Defining Columns & Relations (Strict Mode)
 
 In `BaseCrudService`, you are required to define which columns to display by implementing the `getShowOnListColumns()`
