@@ -62,7 +62,11 @@ abstract class BaseCrudService
 
         foreach ($filter as $column => $value) {
             if (in_array($column, $allowedFilters)) {
-                if (is_array($value)) {
+                if ($value === 'null') {
+                    $query->whereNull($column);
+                } elseif ($value === '!null') {
+                    $query->whereNotNull($column);
+                } elseif (is_array($value)) {
                     $query->whereIn($column, $value);
                 } else {
                     $query->where($column, $value);
