@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Adithwidhiantara\Crud\Http\Services;
 
 use Adithwidhiantara\Crud\Http\Models\CrudModel;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -41,11 +42,18 @@ abstract class BaseCrudService
             $query->with($relationName.':'.implode(',', $cols));
         }
 
+        $query = $this->extendQuery($query);
+
         if ($showAll) {
             return $query->get($localColumns);
         }
 
         return $query->paginate(perPage: $perPage, columns: $localColumns, page: $page);
+    }
+
+    protected function extendQuery(Builder $query): Builder
+    {
+        return $query;
     }
 
     /**
