@@ -47,6 +47,7 @@ abstract class BaseCrudController extends BaseController implements CrudControll
         $perPage = (int) $request->query('per_page', 10);
         $page = (int) $request->query('page', 0);
         $showAll = (bool) $request->query('show_all', false);
+        $search = $request->query('search');
 
         $filter = $request->query('filter', []);
 
@@ -54,7 +55,13 @@ abstract class BaseCrudController extends BaseController implements CrudControll
             $filter = [];
         }
 
-        return Response::json($this->service()->getAll(perPage: $perPage, page: $page, showAll: $showAll, filter: $filter));
+        return Response::json($this->service()->getAll(
+            perPage: $perPage,
+            page: $page,
+            showAll: $showAll,
+            filter: $filter,
+            search: $search
+        ));
     }
 
     abstract public function service(): BaseCrudService;

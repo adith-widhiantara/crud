@@ -19,7 +19,7 @@ abstract class BaseCrudService
     /**
      * @throws Throwable
      */
-    public function getAll(int $perPage, int $page, bool $showAll, array $filter): Collection|LengthAwarePaginator
+    public function getAll(int $perPage, int $page, bool $showAll, array $filter, ?string $search): Collection|LengthAwarePaginator
     {
         $rawColumns = $this->model()->getShowOnListColumns();
 
@@ -47,6 +47,10 @@ abstract class BaseCrudService
 
         $this->applyFilters($query, $filter);
 
+        if ($search) {
+            $this->applySearch($query, $search);
+        }
+
         $query = $this->extendQuery($query);
 
         if ($showAll) {
@@ -54,6 +58,33 @@ abstract class BaseCrudService
         }
 
         return $query->paginate(perPage: $perPage, columns: $localColumns, page: $page);
+    }
+
+    /**
+     * Implement search logic that supports nested relationships via dot notation.
+     * Example: 'title', 'category.name', 'posts.comments.body'
+     */
+    protected function applySearch(Builder $query, string $search): void
+    {
+        $columns = $this->model()->searchableColumns();
+
+        if (empty($columns)) {
+            return;
+        }
+
+        $query->where(function (Builder $q) use ($columns, $search) {
+            foreach ($columns as $column) {
+                if (str_contains($column, '.')) {
+
+                    $lastDotPosition = strrpos($column, '.');
+                    $relation = substr($column, 0, $lastDotPosition);
+                    $field = substr($column, $lastDotPosition + 1);
+                    $q->orWhereRelation($relation, $field, 'LIKE', "%{$search}%");
+                } else {
+                    $q->orWhere($column, 'LIKE', "%{$search}%");
+                }
+            }
+        });
     }
 
     private function applyFilters(Builder $query, array $filter): void

@@ -27,10 +27,19 @@ abstract class CrudModel extends Model
     }
 
     /**
-     * Tentukan kolom mana saja yang boleh difilter via request.
+     * Define which columns are allowed to be filtered via the request.
      * Format: ['status', 'category_id', 'author_id']
      */
     public function filterableColumns(): array
+    {
+        return [];
+    }
+
+    /**
+     * Columns to search when the ?search=abc parameter is present.
+     * Example: return ['name', 'email', 'description'];
+     */
+    public function searchableColumns(): array
     {
         return [];
     }
