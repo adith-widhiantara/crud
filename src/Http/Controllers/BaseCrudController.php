@@ -39,13 +39,22 @@ abstract class BaseCrudController extends BaseController implements CrudControll
         return Str::plural(Str::kebab($modelName));
     }
 
+    /**
+     * @throws Throwable
+     */
     public function index(Request $request): JsonResponse
     {
         $perPage = (int) $request->query('per_page', 10);
         $page = (int) $request->query('page', 0);
         $showAll = (bool) $request->query('show_all', false);
 
-        return Response::json($this->service()->getAll(perPage: $perPage, page: $page, showAll: $showAll));
+        $filter = $request->query('filter', []);
+
+        if (! is_array($filter)) {
+            $filter = [];
+        }
+
+        return Response::json($this->service()->getAll(perPage: $perPage, page: $page, showAll: $showAll, filter: $filter));
     }
 
     abstract public function service(): BaseCrudService;

@@ -25,4 +25,13 @@ abstract class CrudModel extends Model
             $this->getUpdatedAtColumn(),
         ]);
     }
+
+    /**
+     * Tentukan kolom mana saja yang boleh difilter via request.
+     * Format: ['status', 'category_id', 'author_id']
+     */
+    public function filterableColumns(): array
+    {
+        return [];
+    }
 }

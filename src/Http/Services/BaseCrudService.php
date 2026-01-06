@@ -16,7 +16,10 @@ abstract class BaseCrudService
 {
     abstract public function model(): CrudModel;
 
-    public function getAll(int $perPage, int $page, bool $showAll): Collection|LengthAwarePaginator
+    /**
+     * @throws Throwable
+     */
+    public function getAll(int $perPage, int $page, bool $showAll, array $filter): Collection|LengthAwarePaginator
     {
         $rawColumns = $this->model()->getShowOnListColumns();
 
@@ -42,6 +45,8 @@ abstract class BaseCrudService
             $query->with($relationName.':'.implode(',', $cols));
         }
 
+        $this->applyFilters($query, $filter);
+
         $query = $this->extendQuery($query);
 
         if ($showAll) {
@@ -49,6 +54,21 @@ abstract class BaseCrudService
         }
 
         return $query->paginate(perPage: $perPage, columns: $localColumns, page: $page);
+    }
+
+    private function applyFilters(Builder $query, array $filter): void
+    {
+        $allowedFilters = $this->model()->filterableColumns();
+
+        foreach ($filter as $column => $value) {
+            if (in_array($column, $allowedFilters)) {
+                if (is_array($value)) {
+                    $query->whereIn($column, $value);
+                } else {
+                    $query->where($column, $value);
+                }
+            }
+        }
     }
 
     protected function extendQuery(Builder $query): Builder
