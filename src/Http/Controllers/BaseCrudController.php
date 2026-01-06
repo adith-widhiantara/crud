@@ -14,6 +14,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Str;
 use Throwable;
@@ -55,13 +56,21 @@ abstract class BaseCrudController extends BaseController implements CrudControll
             $filter = [];
         }
 
-        return Response::json($this->service()->getAll(
+        $result = $this->service()->getAll(
             perPage: $perPage,
             page: $page,
             showAll: $showAll,
             filter: $filter,
             search: $search
-        ));
+        );
+
+        if ($result instanceof Collection) {
+            return Response::json([
+                'data' => $result,
+            ]);
+        }
+
+        return Response::json($result);
     }
 
     abstract public function service(): BaseCrudService;

@@ -75,7 +75,6 @@ abstract class BaseCrudService
         $query->where(function (Builder $q) use ($columns, $search) {
             foreach ($columns as $column) {
                 if (str_contains($column, '.')) {
-
                     $lastDotPosition = strrpos($column, '.');
                     $relation = substr($column, 0, $lastDotPosition);
                     $field = substr($column, $lastDotPosition + 1);
@@ -93,14 +92,18 @@ abstract class BaseCrudService
 
         foreach ($filter as $column => $value) {
             if (in_array($column, $allowedFilters)) {
+                $qualifiedColumn = str_contains($column, '.')
+                    ? $column
+                    : $this->model()->getTable().'.'.$column;
+
                 if ($value === 'null') {
-                    $query->whereNull($column);
+                    $query->whereNull($qualifiedColumn);
                 } elseif ($value === '!null') {
-                    $query->whereNotNull($column);
+                    $query->whereNotNull($qualifiedColumn);
                 } elseif (is_array($value)) {
-                    $query->whereIn($column, $value);
+                    $query->whereIn($qualifiedColumn, $value);
                 } else {
-                    $query->where($column, $value);
+                    $query->where($qualifiedColumn, $value);
                 }
             }
         }
