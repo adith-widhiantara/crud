@@ -1,8 +1,8 @@
 # Laravel Advanced CRUD Generator
 
 **Laravel CRUD Generator** is a powerful package designed to accelerate backend development. It provides a full suite of
-features including **Auto-Discovery Routes**, **Dynamic Database Schema Validation**, **Bulk Operations**, and *
-*Service-Repository Pattern** out of the box.
+features including **Auto-Discovery Routes**, **Dynamic Database Schema Validation**, **Bulk Operations**, and
+**Service-Repository Pattern** out of the box.
 
 Stop writing repetitive boilerplate code. Just run one command and you are ready to go! 🚀
 
@@ -148,52 +148,72 @@ validated or accepted from the Request payload, override this method.
 
 Here is the English translation for your documentation:
 
-### 🔍 Filtering & Searching
+### 🔍 Filtering, Searching & Sorting
 
-This package provides secure (whitelisted) and powerful filtering and searching features out-of-the-box.
+This package provides secure and powerful query manipulation features out-of-the-box.
 
-#### 1. Filtering (Exact Match)
+#### 1. Filtering
 
-You can filter query results based on specific columns. By default, **no columns are filterable** for security reasons.
-You must register them in your Model.
+You can filter results based on specific columns. By default, **no columns are filterable** for security reasons. You
+must allow them in your Model.
 
 **In Model (`App\Models\Product.php`):**
 
 ```php
 public function filterableColumns(): array
 {
-    // Define columns allowed to be filtered by the user
-    return ['status', 'category_id', 'author_id'];
+    return ['status', 'category_id', 'price', 'created_at'];
 }
-
 ```
 
 **API Usage:**
 
-* **Single Value:** `/api/products?filter[status]=active`
-  *(Query: `WHERE status = 'active'`)*
-* **Multiple Values (Where In):** `/api/products?filter[category_id][]=1&filter[category_id][]=5`
-  *(Query: `WHERE category_id IN (1, 5)`)*
-* **Null Checks:** `/api/products?filter[author_id]=null` or `!null`
-  *(Query: `WHERE author_id IS NULL`)*
+* **Exact Match:** `/api/products?filter[status]=active`
+* *Query:* `WHERE products.status = 'active'`
+
+
+* **Multiple Values (IN):** `/api/products?filter[category_id][]=1&filter[category_id][]=5`
+* *Query:* `WHERE products.category_id IN (1, 5)`
+
+
+* **Null Checks:** `/api/products?filter[deleted_at]=null` (or `!null`)
+* *Query:* `WHERE products.deleted_at IS NULL`
+
+##### Advanced Operators (Range Filtering)
+
+You can use logical operators for range filtering. Supported operators: `eq`, `gt`, `gte`, `lt`, `lte`, `like`,
+`between`.
+
+* **Greater/Less Than:** `/api/products?filter[price][gte]=1000&filter[price][lte]=5000`
+* *Query:* `WHERE products.price >= 1000 AND products.price <= 5000`
+
+
+* **Partial Match (Like):** `/api/products?filter[sku][like]=INV-2024`
+* *Query:* `WHERE products.sku LIKE '%INV-2024%'`
+
+
+* **Date Range (Between):** `/api/products?filter[created_at][between]=2024-01-01,2024-12-31`
+* *Query:* `WHERE products.created_at BETWEEN '2024-01-01' AND '2024-12-31'`
+
+> **Note:** All filter columns are automatically qualified with the table name (e.g., `products.price`) to prevent "
+> Ambiguous Column" errors during joins.
 
 ---
 
-#### 2. Global Search (Fuzzy Logic)
+#### 2. Global Search (Fuzzy)
 
-The search feature allows text searching (`LIKE %keyword%`) across multiple columns simultaneously using `OR` logic. You
-can even search within **Relationships** (Nested Relations).
+The search feature allows text searching (`LIKE %keyword%`) across multiple columns simultaneously using `OR` logic. It
+supports searching within **Nested Relationships**.
 
-**In Model (`App\Models\Product.php`):**
+**In Model:**
 
 ```php
 public function searchableColumns(): array
 {
     return [
-        'name',             // Search in products table, name column
-        'sku',
-        'category.name',    // Search in 'category' relationship, name column
-        'tags.title',       // Search in 'tags' relationship, title column
+        'name',             // Search in current table
+        'category.name',    // Search in 'category' relation
+        'tags.title',       // Search in 'tags' relation
     ];
 }
 
@@ -202,30 +222,41 @@ public function searchableColumns(): array
 **API Usage:**
 
 * **Search:** `/api/products?search=laptop`
-  *(Logic: Search for products where `name` contains "laptop" **OR** `sku` contains "laptop" **OR** category name
-  contains "laptop")*
-
-> **Note:** The Search logic is wrapped within a parameter grouping `AND (...)` so it will not interfere with other
-> active filters.
+* *Logic:* `AND (products.name LIKE '%laptop%' OR category.name LIKE '%laptop%' ...)`
 
 ---
 
-#### 3. Custom Query (ExtendQuery Hook)
+#### 3. Dynamic Sorting
 
-If you require more complex query logic (such as default sorting, user global scopes, or manual joins) without having to
-override the `getAll` method, use the `extendQuery` hook in your Service.
+You can sort results dynamically. Define allowed columns in `sortableColumns()`.
 
-**In Service (`App\Http\Services\ProductService.php`):**
+**In Model:**
 
 ```php
-use Illuminate\Database\Eloquent\Builder;
+public function sortableColumns(): array
+{
+    return ['price', 'created_at', 'name'];
+}
 
+```
+
+**API Usage:**
+
+* **Ascending:** `/api/products?sort=price`
+* **Descending:** `/api/products?sort=-price` (Add `-` prefix)
+
+---
+
+#### 4. Custom Query (Hook)
+
+Use `extendQuery` in your Service to add custom logic (scopes, joins, etc.) without overriding the main `getAll` method.
+
+**In Service:**
+
+```php
 protected function extendQuery(Builder $query): Builder
 {
-    // Example: Default sort by newest
-    $query->orderBy('created_at', 'desc');
-
-    // Example: Only show data belonging to the logged-in user (if not admin)
+    // Example: Only show own data if not admin
     if (!auth()->user()->isAdmin()) {
         $query->where('user_id', auth()->id());
     }
@@ -234,6 +265,10 @@ protected function extendQuery(Builder $query): Builder
 }
 
 ```
+
+The video below explains the common ambiguous column error in Laravel queries, which your new code now prevents.
+
+[Resolving the ambiguous column error in your Laravel Eloquent left join query](https://www.youtube.com/watch?v=3fds4NGJIxg)
 
 ### 🏗️ Defining Columns & Relations (Strict Mode)
 

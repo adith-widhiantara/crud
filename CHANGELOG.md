@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.3.0] - 2026-01-07
+
+### Added
+
+- **Dynamic Sorting**: Added `sortableColumns()` to `CrudModel` to whitelist sortable columns. API now supports
+  `?sort=field` (asc) and `?sort=-field` (desc).
+- **Advanced Filtering**: Added support for logical operators in filtering. Now supports `eq`, `gt`, `gte`, `lt`, `lte`,
+  `like`, and `between` (e.g., `filter[price][gte]=100`).
+- **DTO Implementation**: Introduced `GetAllDto` to encapsulate `index` parameters, improving type safety and code
+  cleanliness in `BaseCrudService`.
+- **Ambiguous Column Protection**: Added logic to automatically prepend the table name to filtered columns (e.g.,
+  `products.status` instead of `status`) to prevent SQL errors when joining tables.
+
+### Changed
+
+- Refactored `BaseCrudService::getAll()` method signature to accept a single `GetAllDto` object instead of multiple
+  individual arguments.
+- Updated `BaseCrudController::index()` to map request parameters into `GetAllDto`.
+
+### Fixed
+
+- Fixed potential "Integrity constraint violation: Column is ambiguous" error in `applyFilters` when using joins in
+  `extendQuery`.
+
 ## 1.2.0 | 2025-01-06
 
 ### Added
