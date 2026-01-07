@@ -6,8 +6,11 @@ use Adithwidhiantara\Crud\Dtos\GetAllDto;
 use Adithwidhiantara\Crud\Http\Models\CrudModel;
 use Adithwidhiantara\Crud\Http\Services\BaseCrudService;
 use Adithwidhiantara\Crud\Tests\TestCase;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Schema;
 use InvalidArgumentException;
 
@@ -67,8 +70,40 @@ class BaseCrudServiceTest extends TestCase
 
         $result = $service->getAll($dto);
 
-        $this->assertInstanceOf(\Illuminate\Pagination\LengthAwarePaginator::class, $result);
+        $this->assertInstanceOf(LengthAwarePaginator::class, $result);
         $this->assertCount(1, $result);
+        $this->assertEquals('Item 1', $result->first()->name);
+    }
+
+    /** @test */
+    public function get_all_returns_paginated_results_with_pagination_is_incorrect()
+    {
+        ServiceTestModel::create(['name' => 'Item 1', 'price' => 100]);
+        ServiceTestModel::create(['name' => 'Item 2', 'price' => 200]);
+
+        $service = new ConcreteService;
+        $dto = $this->createDto(perPage: -1, page: -1);
+
+        $result = $service->getAll($dto);
+
+        $this->assertInstanceOf(LengthAwarePaginator::class, $result);
+        $this->assertCount(2, $result);
+        $this->assertEquals('Item 1', $result->first()->name);
+    }
+
+    /** @test */
+    public function get_all_returns_paginated_results_with_pagination_perpage_more_than_100()
+    {
+        ServiceTestModel::create(['name' => 'Item 1', 'price' => 100]);
+        ServiceTestModel::create(['name' => 'Item 2', 'price' => 200]);
+
+        $service = new ConcreteService;
+        $dto = $this->createDto(perPage: 120, page: -1);
+
+        $result = $service->getAll($dto);
+
+        $this->assertInstanceOf(LengthAwarePaginator::class, $result);
+        $this->assertCount(2, $result);
         $this->assertEquals('Item 1', $result->first()->name);
     }
 
@@ -83,7 +118,7 @@ class BaseCrudServiceTest extends TestCase
 
         $result = $service->getAll($dto);
 
-        $this->assertInstanceOf(\Illuminate\Database\Eloquent\Collection::class, $result);
+        $this->assertInstanceOf(Collection::class, $result);
         $this->assertCount(2, $result);
     }
 
@@ -356,7 +391,7 @@ class ServiceTestModel extends CrudModel
 
     public function getShowOnListColumns(): array
     {
-        return ['id', 'name', 'price', 'status'];
+        return ['id', 'name', 'price', 'status', 'related.description'];
     }
 
     public function filterableColumns(): array
@@ -374,7 +409,7 @@ class ServiceTestModel extends CrudModel
         return ['price'];
     }
 
-    public function related()
+    public function related(): BelongsTo
     {
         return $this->belongsTo(RelatedModel::class);
     }
