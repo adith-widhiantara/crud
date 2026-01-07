@@ -9,6 +9,7 @@ use Adithwidhiantara\Crud\Http\Models\CrudModel;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 use Throwable;
@@ -56,6 +57,8 @@ abstract class BaseCrudService
             $this->applySearch($query, $search);
         }
 
+        $this->applySorting($query, $data->sort);
+
         $query = $this->extendQuery($query);
 
         if ($data->showAll) {
@@ -63,6 +66,30 @@ abstract class BaseCrudService
         }
 
         return $query->paginate(perPage: $perPage, columns: $localColumns, page: $page);
+    }
+
+    /**
+     * Logic Sorting Dynamic
+     * Format: ?sort=price (ASC) atau ?sort=-price (DESC)
+     */
+    protected function applySorting(Builder $query, ?string $sort): void
+    {
+        if (! $sort) {
+            return;
+        }
+
+        $direction = 'asc';
+
+        // Cek prefix '-' for descending
+        if (str_starts_with($sort, '-')) {
+            $direction = 'desc';
+            $sort = substr($sort, 1);
+        }
+
+        // Validate Whitelist from Model
+        if (in_array($sort, $this->model()->sortableColumns())) {
+            $query->orderBy($sort, $direction);
+        }
     }
 
     /**
@@ -91,26 +118,78 @@ abstract class BaseCrudService
         });
     }
 
+    /**
+     * Logic Filter with support Operator (Range, Like, Between)
+     */
     private function applyFilters(Builder $query, array $filter): void
     {
         $allowedFilters = $this->model()->filterableColumns();
 
         foreach ($filter as $column => $value) {
-            if (in_array($column, $allowedFilters)) {
-                $qualifiedColumn = str_contains($column, '.')
-                    ? $column
-                    : $this->model()->getTable().'.'.$column;
-
-                if ($value === 'null') {
-                    $query->whereNull($qualifiedColumn);
-                } elseif ($value === '!null') {
-                    $query->whereNotNull($qualifiedColumn);
-                } elseif (is_array($value)) {
-                    $query->whereIn($qualifiedColumn, $value);
-                } else {
-                    $query->where($qualifiedColumn, $value);
-                }
+            if (! in_array($column, $allowedFilters)) {
+                continue;
             }
+
+            // Handle Null Checks (Existing)
+            if ($value === 'null') {
+                $query->whereNull($column);
+
+                continue;
+            }
+
+            if ($value === '!null') {
+                $query->whereNotNull($column);
+
+                continue;
+            }
+
+            // Handle Array Values (Operator vs WhereIn)
+            if (is_array($value)) {
+                // Cek apakah array asosiatif (Key-Value) -> Operator Logic
+                // Contoh: filter[price][gte]=1000 -> ['gte' => 1000]
+                if (Arr::isAssoc($value)) {
+                    foreach ($value as $operator => $val) {
+                        $this->applyOperator($query, $column, $operator, $val);
+                    }
+                } else {
+                    // Array biasa (Indexed) -> WhereIn Logic
+                    // Contoh: filter[category_id][]=1&filter[category_id][]=2 -> [1, 2]
+                    $query->whereIn($column, $value);
+                }
+            } else {
+                // Basic Equality (Existing)
+                $query->where($column, $value);
+            }
+        }
+    }
+
+    /**
+     * Helper for translating operator string to Query Builder
+     */
+    protected function applyOperator(Builder $query, string $column, string $operator, mixed $value): void
+    {
+        match ($operator) {
+            'eq' => $query->where($column, '=', $value),
+            'gt' => $query->where($column, '>', $value),
+            'gte' => $query->where($column, '>=', $value),
+            'lt' => $query->where($column, '<', $value),
+            'lte' => $query->where($column, '<=', $value),
+            'like' => $query->where($column, 'LIKE', "%{$value}%"),
+            'between' => $this->handleBetweenOperator($query, $column, $value),
+            default => null, // Ignore when operator not registered
+        };
+    }
+
+    protected function handleBetweenOperator(Builder $query, string $column, mixed $value): void
+    {
+        // Support format string comma-separated: filter[date][between]=2023-01-01,2023-01-31
+        if (is_string($value) && str_contains($value, ',')) {
+            $value = explode(',', $value);
+        }
+
+        // Support format array: filter[date][between][]=2023-01-01&filter[date][between][]=2023-01-31
+        if (is_array($value) && count($value) >= 2) {
+            $query->whereBetween($column, [$value[0], $value[1]]);
         }
     }
 

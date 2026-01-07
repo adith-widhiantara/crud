@@ -10,6 +10,7 @@ final readonly class GetAllDto extends BaseDto
         public bool $showAll,
         public array $filter,
         public ?string $search,
+        public ?string $sort,
     ) {
         //
     }

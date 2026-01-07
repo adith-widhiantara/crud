@@ -57,7 +57,8 @@ abstract class BaseCrudController extends BaseController implements CrudControll
             page: (int) $request->query('page', 0),
             showAll: (bool) $request->query('show_all', false),
             filter: $filter,
-            search: $request->query('search')
+            search: $request->query('search'),
+            sort: $request->query('sort'),
         ));
 
         if ($result instanceof Collection) {

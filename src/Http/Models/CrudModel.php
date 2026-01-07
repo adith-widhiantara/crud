@@ -43,4 +43,16 @@ abstract class CrudModel extends Model
     {
         return [];
     }
+
+    /**
+     * Define columns allowed to be sorted via request.
+     * Example: return ['created_at', 'price', 'name'];
+     * Default: created_at
+     */
+    public function sortableColumns(): array
+    {
+        return [
+            $this->getCreatedAtColumn(),
+        ];
+    }
 }
