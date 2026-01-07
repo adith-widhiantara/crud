@@ -129,7 +129,7 @@ class BaseCrudServiceTest extends TestCase
         ServiceTestModel::create(['name' => 'B', 'status' => 'inactive']);
 
         $service = new ConcreteService;
-        $dto = $this->createDto(filter: ['status' => 'active']);
+        $dto = $this->createDto(filter: ['test_models.status' => 'active']);
 
         $result = $service->getAll($dto);
 
@@ -331,13 +331,13 @@ class BaseCrudServiceTest extends TestCase
         $service = new ConcreteService;
 
         // Test is null
-        $dto = $this->createDto(filter: ['status' => 'null']);
+        $dto = $this->createDto(filter: ['test_models.status' => 'null']);
         $result = $service->getAll($dto);
         $this->assertCount(1, $result);
         $this->assertEquals('Null Status', $result->first()->name);
 
         // Test not null
-        $dto = $this->createDto(filter: ['status' => '!null']);
+        $dto = $this->createDto(filter: ['test_models.status' => '!null']);
         $result = $service->getAll($dto);
         $this->assertCount(1, $result);
         $this->assertEquals('NotNull Status', $result->first()->name);
@@ -366,6 +366,69 @@ class BaseCrudServiceTest extends TestCase
     }
 
     /** @test */
+    public function it_handles_like_operator()
+    {
+        ServiceTestModel::create(['name' => 'A', 'price' => 10]);
+        ServiceTestModel::create(['name' => 'B', 'price' => 50]);
+        ServiceTestModel::create(['name' => 'C', 'price' => 100]);
+
+        $service = new ConcreteService;
+
+        // String format "like"
+        $dto = $this->createDto(filter: ['price' => ['like' => 10]]);
+        $result = $service->getAll($dto);
+        $this->assertCount(2, $result);
+        $this->assertEquals('A', $result->first()->name);
+    }
+
+    /** @test */
+    public function it_handles_eq_operator()
+    {
+        ServiceTestModel::create(['name' => 'A', 'price' => 10]);
+        ServiceTestModel::create(['name' => 'B', 'price' => 50]);
+        ServiceTestModel::create(['name' => 'C', 'price' => 100]);
+
+        $service = new ConcreteService;
+
+        // String format "eq"
+        $dto = $this->createDto(filter: ['price' => ['eq' => 10]]);
+        $result = $service->getAll($dto);
+        $this->assertCount(1, $result);
+        $this->assertEquals('A', $result->first()->name);
+    }
+
+    /** @test */
+    public function it_handles_gte_operator()
+    {
+        ServiceTestModel::create(['name' => 'A', 'price' => 10]);
+        ServiceTestModel::create(['name' => 'B', 'price' => 50]);
+        ServiceTestModel::create(['name' => 'C', 'price' => 100]);
+
+        $service = new ConcreteService;
+
+        // String format "gte"
+        $dto = $this->createDto(filter: ['price' => ['gte' => 10]]);
+        $result = $service->getAll($dto);
+        $this->assertCount(3, $result);
+        $this->assertEquals('A', $result->first()->name);
+    }
+
+    /** @test */
+    public function it_handles_lt_operator()
+    {
+        ServiceTestModel::create(['name' => 'A', 'price' => 10]);
+        ServiceTestModel::create(['name' => 'B', 'price' => 50]);
+        ServiceTestModel::create(['name' => 'C', 'price' => 100]);
+
+        $service = new ConcreteService;
+
+        // String format "lt"
+        $dto = $this->createDto(filter: ['price' => ['lt' => 10]]);
+        $result = $service->getAll($dto);
+        $this->assertCount(0, $result);
+    }
+
+    /** @test */
     public function it_ignores_invalid_sort_columns()
     {
         ServiceTestModel::create(['name' => 'Z', 'price' => 10]);
@@ -380,6 +443,80 @@ class BaseCrudServiceTest extends TestCase
         // So Z (id 1) first, A (id 2) second.
         $this->assertCount(2, $result);
         $this->assertEquals('Z', $result->first()->name);
+    }
+
+    /** @test */
+    public function get_all_search_with_nested_relation()
+    {
+        $related1 = RelatedModel::create(['description' => 'Apple']);
+        ServiceTestModel::create(['name' => 'Item 1', 'related_model_id' => $related1->id]);
+
+        $related2 = RelatedModel::create(['description' => 'Banana']);
+        ServiceTestModel::create(['name' => 'Item 2', 'related_model_id' => $related2->id]);
+
+        // Mock Service with nested search column
+        $model = new class extends ServiceTestModel
+        {
+            public function searchableColumns(): array
+            {
+                return ['related.description'];
+            }
+        };
+
+        $service = new class($model) extends BaseCrudService
+        {
+            protected $model;
+
+            public function __construct($model)
+            {
+                $this->model = $model;
+            }
+
+            public function model(): CrudModel
+            {
+                return $this->model;
+            }
+        };
+
+        $dto = $this->createDto(search: 'App');
+        $result = $service->getAll($dto);
+
+        $this->assertCount(1, $result);
+        $this->assertEquals('Item 1', $result->first()->name);
+    }
+
+    /** @test */
+    public function get_all_filters_by_list_of_values()
+    {
+        ServiceTestModel::create(['name' => 'A', 'price' => 10]);
+        ServiceTestModel::create(['name' => 'B', 'price' => 20]);
+        ServiceTestModel::create(['name' => 'C', 'price' => 30]);
+
+        $service = new ConcreteService;
+
+        // filter by list: price IN (10, 30)
+        $dto = $this->createDto(filter: ['price' => [10, 30]]);
+        $result = $service->getAll($dto);
+
+        $this->assertCount(2, $result);
+        $this->assertEquals('A', $result->first()->name);
+        $this->assertEquals('C', $result->last()->name);
+    }
+
+    /** @test */
+    public function get_all_filters_ignores_invalid_operators()
+    {
+        ServiceTestModel::create(['name' => 'A', 'price' => 10]);
+
+        $service = new ConcreteService;
+
+        // filter with invalid operator should do nothing (or fail gracefully depending on query)
+        // Here it basically adds nothing to query, so returns all
+        $dto = $this->createDto(filter: ['price' => ['unknown_op' => 10]]);
+        $result = $service->getAll($dto);
+
+        $this->assertCount(1, $result);
+        $this->assertEquals('A', $result->first()->name);
     }
 }
 
@@ -396,7 +533,7 @@ class ServiceTestModel extends CrudModel
 
     public function filterableColumns(): array
     {
-        return ['status', 'price', 'related.description'];
+        return [$this->table.'.status', 'price', 'related.description'];
     }
 
     public function searchableColumns(): array
@@ -411,7 +548,7 @@ class ServiceTestModel extends CrudModel
 
     public function related(): BelongsTo
     {
-        return $this->belongsTo(RelatedModel::class);
+        return $this->belongsTo(RelatedModel::class, 'related_model_id');
     }
 }
 
