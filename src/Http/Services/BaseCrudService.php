@@ -130,35 +130,39 @@ abstract class BaseCrudService
                 continue;
             }
 
+            $qualifiedColumn = str_contains($column, '.')
+                ? $column
+                : $this->model()->getTable().'.'.$column;
+
             // Handle Null Checks (Existing)
             if ($value === 'null') {
-                $query->whereNull($column);
+                $query->whereNull($qualifiedColumn);
 
                 continue;
             }
 
             if ($value === '!null') {
-                $query->whereNotNull($column);
+                $query->whereNotNull($qualifiedColumn);
 
                 continue;
             }
 
             // Handle Array Values (Operator vs WhereIn)
             if (is_array($value)) {
-                // Cek apakah array asosiatif (Key-Value) -> Operator Logic
-                // Contoh: filter[price][gte]=1000 -> ['gte' => 1000]
+                // Check if array associative (Key-Value) -> Operator Logic
+                // Example: filter[price][gte]=1000 -> ['gte' => 1000]
                 if (Arr::isAssoc($value)) {
                     foreach ($value as $operator => $val) {
-                        $this->applyOperator($query, $column, $operator, $val);
+                        $this->applyOperator($query, $qualifiedColumn, $operator, $val);
                     }
                 } else {
-                    // Array biasa (Indexed) -> WhereIn Logic
-                    // Contoh: filter[category_id][]=1&filter[category_id][]=2 -> [1, 2]
-                    $query->whereIn($column, $value);
+                    // Normal array (Indexed) -> WhereIn Logic
+                    // Example: filter[category_id][]=1&filter[category_id][]=2 -> [1, 2]
+                    $query->whereIn($qualifiedColumn, $value);
                 }
             } else {
                 // Basic Equality (Existing)
-                $query->where($column, $value);
+                $query->where($qualifiedColumn, $value);
             }
         }
     }
