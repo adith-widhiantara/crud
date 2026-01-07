@@ -52,7 +52,9 @@ class CrudRequest extends FormRequest implements StoreRequestContract, UpdateReq
             $type = strtolower($column['type_name']);
             $fullType = strtolower($column['type']);      // Contoh: character varying(20)
 
-            if (str_contains($type, 'int')) {
+            if (in_array($type, ['bool', 'boolean', 'tinyint(1)'])) {
+                $columnRules[] = 'boolean';
+            } elseif (str_contains($type, 'int')) {
                 // integer, bigint, smallint, tinyint
                 $columnRules[] = 'integer';
             } elseif (in_array($type, ['varchar', 'text', 'char', 'string'])) {
@@ -65,8 +67,6 @@ class CrudRequest extends FormRequest implements StoreRequestContract, UpdateReq
                         $columnRules[] = 'max:'.$length;
                     }
                 }
-            } elseif (in_array($type, ['bool', 'boolean', 'tinyint(1)'])) {
-                $columnRules[] = 'boolean';
             } elseif (in_array($type, ['decimal', 'float', 'double', 'numeric'])) {
                 $columnRules[] = 'numeric';
             } elseif (in_array($type, ['date', 'time', 'datetime', 'timestamp'])) {

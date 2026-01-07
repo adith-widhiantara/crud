@@ -7,14 +7,31 @@ use Illuminate\Support\Facades\File;
 
 class MakeCrudCommandTest extends TestCase
 {
-    // Bersihkan file yang digenerate setelah test selesai
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->cleanupGeneratedFiles();
+    }
+
     protected function tearDown(): void
+    {
+        $this->cleanupGeneratedFiles();
+        parent::tearDown();
+    }
+
+    protected function cleanupGeneratedFiles(): void
     {
         // Hapus file dummy yang mungkin terbuat
         $filesToDelete = [
             app_path('Models/Product.php'),
             app_path('Http/Controllers/ProductController.php'),
             app_path('Http/Services/ProductService.php'),
+            base_path('tests/Feature/ProductControllerTest.php'),
+            // Files for naming convention test
+            app_path('Models/UserProfile.php'),
+            app_path('Http/Controllers/UserProfileController.php'),
+            app_path('Http/Services/UserProfileService.php'),
+            base_path('tests/Feature/UserProfileControllerTest.php'),
         ];
 
         foreach ($filesToDelete as $file) {
@@ -23,16 +40,24 @@ class MakeCrudCommandTest extends TestCase
             }
         }
 
-        parent::tearDown();
+        // Cleanup migrations (using glob because filename has timestamp)
+        $migrations = File::glob(database_path('migrations/*_create_products_table.php'));
+        foreach ($migrations as $migration) {
+            File::delete($migration);
+        }
+
+        $migrationsUserProfile = File::glob(database_path('migrations/*_create_user_profiles_table.php'));
+        foreach ($migrationsUserProfile as $migration) {
+            File::delete($migration);
+        }
     }
 
     /** @test */
     public function it_can_run_make_crud_command()
     {
         // 1. Jalankan command
-        // Kita gunakan --no-interaction supaya tidak tanya-tanya input
         $this->artisan('make:crud', ['name' => 'Product'])
-            ->assertExitCode(0); // 0 artinya sukses (Command::SUCCESS)
+            ->assertExitCode(0);
 
         // 2. Verifikasi File Terbuat
         // Cek Model
@@ -43,5 +68,73 @@ class MakeCrudCommandTest extends TestCase
 
         // Cek Controller
         $this->assertTrue(File::exists(app_path('Http/Controllers/ProductController.php')), 'Controller Product tidak ditemukan');
+
+        // Cek Test
+        $this->assertTrue(File::exists(base_path('tests/Feature/ProductControllerTest.php')), 'Test Product tidak ditemukan');
+
+        // Cek Migration
+        $migrations = File::glob(database_path('migrations/*_create_products_table.php'));
+        $this->assertCount(1, $migrations, 'Migration file tidak ditemukan');
+    }
+
+    /** @test */
+    public function it_generates_correct_file_content()
+    {
+        $this->artisan('make:crud', ['name' => 'Product']);
+
+        // Verifikasi content Model
+        $modelContent = File::get(app_path('Models/Product.php'));
+        $this->assertStringContainsString('class Product extends CrudModel', $modelContent);
+        $this->assertStringContainsString('namespace App\Models;', $modelContent);
+
+        // Verifikasi content Service
+        $serviceContent = File::get(app_path('Http/Services/ProductService.php'));
+        $this->assertStringContainsString('class ProductService extends BaseCrudService', $serviceContent);
+        $this->assertStringContainsString('return new Product();', $serviceContent);
+
+        // Verifikasi content Controller
+        $controllerContent = File::get(app_path('Http/Controllers/ProductController.php'));
+        $this->assertStringContainsString('class ProductController extends BaseCrudController', $controllerContent);
+        $this->assertStringContainsString('return new ProductService();', $controllerContent);
+    }
+
+    /** @test */
+    public function it_skips_generation_if_file_exists()
+    {
+        // Run first time
+        $this->artisan('make:crud', ['name' => 'Product']);
+
+        // Capture original content
+        $originalContent = File::get(app_path('Models/Product.php'));
+
+        // Modify the file content to ensure it is NOT overwritten
+        File::put(app_path('Models/Product.php'), 'MODIFIED CONTENT');
+
+        // Run second time
+        $this->artisan('make:crud', ['name' => 'Product'])
+            ->expectsOutput('Model Product already exists. Skipped.')
+            ->expectsOutput('Service ProductService already exists. Skipped.')
+            ->expectsOutput('Controller ProductController already exists. Skipped.')
+            ->expectsOutput('Unit Test ProductControllerTest already exists. Skipped.')
+            ->assertExitCode(0);
+
+        // Assert content is STILL the modified content (meaning it was skipped)
+        $this->assertEquals('MODIFIED CONTENT', File::get(app_path('Models/Product.php')));
+    }
+
+    /** @test */
+    public function it_handles_naming_conventions()
+    {
+        // Input snake_case atau lower case -> harus jadi PascalCase buat Class
+        // user_profile -> UserProfile
+        $this->artisan('make:crud', ['name' => 'user_profile'])
+            ->assertExitCode(0);
+
+        $this->assertTrue(File::exists(app_path('Models/UserProfile.php')), 'Model UserProfile tidak terbuat');
+        $this->assertTrue(File::exists(app_path('Http/Services/UserProfileService.php')), 'Service UserProfile tidak terbuat');
+
+        // Cek migration name harus plural snake_case: user_profiles
+        $migrations = File::glob(database_path('migrations/*_create_user_profiles_table.php'));
+        $this->assertCount(1, $migrations, 'Migration user_profiles tidak ditemukan');
     }
 }
