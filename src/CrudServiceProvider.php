@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use ReflectionClass;
+use ReflectionException;
 use ReflectionMethod;
 use ReflectionNamedType;
 use SplFileInfo;
@@ -85,6 +86,7 @@ class CrudServiceProvider extends ServiceProvider
                     }
 
                     // Instantiate dummy controller untuk ambil base slug (misal: 'products')
+                    /** @var BaseCrudController $controllerInstance */
                     $controllerInstance = app($className);
                     $baseSlug = $controllerInstance->getRouteKeyName();
 
@@ -98,6 +100,9 @@ class CrudServiceProvider extends ServiceProvider
             });
     }
 
+    /**
+     * @throws ReflectionException
+     */
     protected function registerCustomMethods(string $className, string $baseSlug): void
     {
         $reflector = new ReflectionClass($className);

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Adithwidhiantara\Crud\Http\Services;
 
+use Adithwidhiantara\Crud\Dtos\GetAllDto;
 use Adithwidhiantara\Crud\Http\Models\CrudModel;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -19,8 +20,12 @@ abstract class BaseCrudService
     /**
      * @throws Throwable
      */
-    public function getAll(int $perPage, int $page, bool $showAll, array $filter, ?string $search): Collection|LengthAwarePaginator
+    public function getAll(GetAllDto $data): Collection|LengthAwarePaginator
     {
+        $perPage = $data->perPage;
+        $page = $data->page;
+        $search = $data->search;
+
         $rawColumns = $this->model()->getShowOnListColumns();
 
         [$localColumns, $relations] = $this->parseColumnsAndRelations($rawColumns);
@@ -45,7 +50,7 @@ abstract class BaseCrudService
             $query->with($relationName.':'.implode(',', $cols));
         }
 
-        $this->applyFilters($query, $filter);
+        $this->applyFilters($query, $data->filter);
 
         if ($search) {
             $this->applySearch($query, $search);
@@ -53,7 +58,7 @@ abstract class BaseCrudService
 
         $query = $this->extendQuery($query);
 
-        if ($showAll) {
+        if ($data->showAll) {
             return $query->get($localColumns);
         }
 
