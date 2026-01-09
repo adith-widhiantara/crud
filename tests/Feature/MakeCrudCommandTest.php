@@ -170,6 +170,12 @@ class MakeCrudCommandTest extends TestCase
                 return file_exists($path);
             });
 
+        // Allow reading files (e.g. stubs for migration)
+        File::shouldReceive('get')
+            ->andReturnUsing(function ($path) {
+                return file_get_contents($path);
+            });
+
         // Expect makeDirectory calls
         File::shouldReceive('makeDirectory')->with(app_path('Models'), 0755, true)->once();
         File::shouldReceive('makeDirectory')->with(app_path('Http/Services'), 0755, true)->once();

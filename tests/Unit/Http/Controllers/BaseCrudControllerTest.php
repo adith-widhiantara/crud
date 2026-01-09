@@ -213,6 +213,7 @@ class BaseCrudControllerTest extends TestCase
         $controller = new class ($this->serviceMock) extends BaseCrudController {
             protected $service;
             protected string $storeRequest = 'NonExistentClass'; // Class does not exist
+            protected string $updateRequest = TestCrudRequest::class; // Avoid CrudRequest logic
 
             public function __construct($service)
             {
@@ -241,6 +242,7 @@ class BaseCrudControllerTest extends TestCase
         $controller = new class ($this->serviceMock) extends BaseCrudController {
             protected $service;
             protected string $storeRequest = RequestWithoutRules::class;
+            protected string $updateRequest = TestCrudRequest::class; // Avoid CrudRequest logic
 
             public function __construct($service)
             {
@@ -287,6 +289,7 @@ class BaseCrudControllerTest extends TestCase
         $controller = new class ($this->serviceMock) extends BaseCrudController {
             protected $service;
             protected string $storeRequest = RequestWithRoute::class;
+            protected string $updateRequest = TestCrudRequest::class; // Avoid CrudRequest logic
 
             public function __construct($service)
             {
