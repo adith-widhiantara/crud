@@ -32,6 +32,11 @@ class MakeCrudCommandTest extends TestCase
             app_path('Http/Controllers/UserProfileController.php'),
             app_path('Http/Services/UserProfileService.php'),
             base_path('tests/Feature/UserProfileControllerTest.php'),
+            // Files for NewDirTest
+            app_path('Models/NewDirTest.php'),
+            app_path('Http/Services/NewDirTestService.php'),
+            app_path('Http/Controllers/NewDirTestController.php'),
+            base_path('tests/Feature/NewDirTestControllerTest.php'),
         ];
 
         foreach ($filesToDelete as $file) {
@@ -48,6 +53,11 @@ class MakeCrudCommandTest extends TestCase
 
         $migrationsUserProfile = File::glob(database_path('migrations/*_create_user_profiles_table.php'));
         foreach ($migrationsUserProfile as $migration) {
+            File::delete($migration);
+        }
+
+        $migrationsNewDirTest = File::glob(database_path('migrations/*_create_new_dir_tests_table.php'));
+        foreach ($migrationsNewDirTest as $migration) {
             File::delete($migration);
         }
     }
