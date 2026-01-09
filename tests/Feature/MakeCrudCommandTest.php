@@ -176,6 +176,9 @@ class MakeCrudCommandTest extends TestCase
                 return file_get_contents($path);
             });
 
+        // Allow migration creator to ensure directory exists
+        File::shouldReceive('ensureDirectoryExists')->andReturn(true);
+
         // Expect makeDirectory calls
         File::shouldReceive('makeDirectory')->with(app_path('Models'), 0755, true)->once();
         File::shouldReceive('makeDirectory')->with(app_path('Http/Services'), 0755, true)->once();
