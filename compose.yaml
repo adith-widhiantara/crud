@@ -5,6 +5,8 @@ services:
       dockerfile: Dockerfile
     image: adith-crud-dev
     container_name: adith-crud-dev
+    environment:
+      XDEBUG_MODE: coverage
     # Mounting folder saat ini ke dalam container
     volumes:
       - .:/app

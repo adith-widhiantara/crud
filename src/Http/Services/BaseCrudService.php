@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use InvalidArgumentException;
 use Throwable;
 
@@ -27,9 +28,14 @@ abstract class BaseCrudService
         $page = $data->page;
         $search = $data->search;
 
-        $rawColumns = $this->model()->getShowOnListColumns();
+        $model = $this->model();
+        $tableName = $model->getTable();
 
-        [$localColumns, $relations] = $this->parseColumnsAndRelations($rawColumns);
+        $rawColumns = $model->getShowOnListColumns();
+
+        [$localColumns, $relations] = $this->parseColumnsAndRelations(array_merge([$tableName.'.id'], array_map(function (string $column) use ($tableName) {
+            return Str::contains($column, '.') ? $column : $tableName.'.'.$column;
+        }, $rawColumns)));
 
         if ($perPage < 1) {
             $perPage = 10;
@@ -207,11 +213,15 @@ abstract class BaseCrudService
      */
     protected function parseColumnsAndRelations(array $columns): array
     {
+        $model = $this->model();
+        $tableName = $model->getTable();
+
         $local = [];
         $relations = [];
 
         foreach ($columns as $column) {
-            if (str_contains($column, '.')) {
+            $strBefore = Str::before($column, '.');
+            if($strBefore !== $tableName) {
                 [$relation, $field] = explode('.', $column, 2);
 
                 throw_if($field === '*', new InvalidArgumentException(

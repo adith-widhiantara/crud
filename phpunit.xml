@@ -12,6 +12,11 @@
             <directory suffix="Test.php">./tests/Unit</directory>
         </testsuite>
     </testsuites>
+    <source>
+        <include>
+            <directory suffix=".php">./src</directory>
+        </include>
+    </source>
     <php>
         <env name="APP_KEY" value="base64:2fl+Ktvkfl+Fuz4Qh/Lx1urnOqiqnMjg4xwUl5LZoJV="/>
         <env name="DB_CONNECTION" value="testing"/>

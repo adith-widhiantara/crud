@@ -7,7 +7,9 @@ RUN apt-get update && apt-get install -y \
     unzip \
     libzip-dev \
     libsqlite3-dev \
-    && docker-php-ext-install zip pdo pdo_sqlite
+    && docker-php-ext-install zip pdo pdo_sqlite \
+    && pecl install xdebug \
+    && docker-php-ext-enable xdebug
 
 # 2. Install Composer dari image resmi
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
