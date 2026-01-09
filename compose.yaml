@@ -1,0 +1,17 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: adith-crud-dev
+    container_name: adith-crud-dev
+    # Mounting folder saat ini ke dalam container
+    volumes:
+      - .:/app
+    # PENTING: Menggunakan User ID host agar tidak ada masalah permission di Ubuntu
+    # 'id -u' dan 'id -g' akan mengambil ID user Anda saat ini
+    user: "${UID}:${GID}"
+    # Agar container tidak langsung mati setelah selesai, kita beri command infinite loop
+    # atau bisa dihapus jika kita hanya ingin menjalankan command "run"
+    command: tail -f /dev/null
+    tty: true
