@@ -50,11 +50,11 @@ abstract class BaseCrudService
         $query = $this->model()->query();
 
         foreach ($relations as $relationName => $cols) {
-            if (! in_array('id', $cols)) {
+            if (!in_array('id', $cols)) {
                 $cols[] = 'id';
             }
 
-            $query->with($relationName.':'.implode(',', $cols));
+            $query->with($relationName . ':' . implode(',', $cols));
         }
 
         $this->applyFilters($query, $data->filter);
@@ -80,7 +80,7 @@ abstract class BaseCrudService
      */
     protected function applySorting(Builder $query, ?string $sort): void
     {
-        if (! $sort) {
+        if (!$sort) {
             return;
         }
 
@@ -132,13 +132,13 @@ abstract class BaseCrudService
         $allowedFilters = $this->model()->filterableColumns();
 
         foreach ($filter as $column => $value) {
-            if (! in_array($column, $allowedFilters)) {
+            if (!in_array($column, $allowedFilters)) {
                 continue;
             }
 
             $qualifiedColumn = str_contains($column, '.')
                 ? $column
-                : $this->model()->getTable().'.'.$column;
+                : $this->model()->getTable() . '.' . $column;
 
             // Handle Null Checks (Existing)
             if ($value === 'null') {
@@ -221,7 +221,7 @@ abstract class BaseCrudService
 
         foreach ($columns as $column) {
             $strBefore = Str::before($column, '.');
-            if($strBefore !== $tableName) {
+            if ($strBefore !== $tableName) {
                 [$relation, $field] = explode('.', $column, 2);
 
                 throw_if($field === '*', new InvalidArgumentException(
@@ -230,13 +230,13 @@ abstract class BaseCrudService
 
                 $relations[$relation][] = $field;
             } else {
+                throw_if(Str::endsWith($column, '.*'), new InvalidArgumentException(
+                    'Please define specific columns to avoid "SELECT *".'
+                ));
+
                 $local[] = $column;
             }
         }
-
-        throw_if(empty($local), new InvalidArgumentException(
-            'No local columns specified in getShowOnListColumns(). Please define specific columns to avoid "SELECT *".'
-        ));
 
         return [$local, $relations];
     }
@@ -316,21 +316,21 @@ abstract class BaseCrudService
                 'deleted' => 0,
             ];
 
-            if (! empty($data['create']) && is_array($data['create'])) {
+            if (!empty($data['create']) && is_array($data['create'])) {
                 foreach ($data['create'] as $item) {
                     $this->create($item);
                     $summary['created']++;
                 }
             }
 
-            if (! empty($data['update']) && is_array($data['update'])) {
+            if (!empty($data['update']) && is_array($data['update'])) {
                 foreach ($data['update'] as $id => $attributes) {
                     $this->update($id, $attributes);
                     $summary['updated']++;
                 }
             }
 
-            if (! empty($data['delete']) && is_array($data['delete'])) {
+            if (!empty($data['delete']) && is_array($data['delete'])) {
                 // destroy() bisa menerima array ID sekaligus
                 $deletedCount = $this->delete($data['delete']);
                 $summary['deleted'] = $deletedCount;

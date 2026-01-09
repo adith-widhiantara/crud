@@ -291,38 +291,6 @@ class BaseCrudServiceTest extends TestCase
     }
 
     /** @test */
-    public function it_throws_exception_if_no_local_columns()
-    {
-        $model = new class extends ServiceTestModel
-        {
-            public function getShowOnListColumns(): array
-            {
-                return ['related.description']; // Only relation, no local
-            }
-        };
-
-        $service = new class($model) extends BaseCrudService
-        {
-            protected $model;
-
-            public function __construct($model)
-            {
-                $this->model = $model;
-            }
-
-            public function model(): CrudModel
-            {
-                return $this->model;
-            }
-        };
-
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('No local columns specified');
-
-        $service->getAll($this->createDto());
-    }
-
-    /** @test */
     public function it_handles_null_filters()
     {
         ServiceTestModel::create(['name' => 'Null Status', 'status' => null]);
