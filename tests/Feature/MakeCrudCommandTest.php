@@ -137,4 +137,33 @@ class MakeCrudCommandTest extends TestCase
         $migrations = File::glob(database_path('migrations/*_create_user_profiles_table.php'));
         $this->assertCount(1, $migrations, 'Migration user_profiles tidak ditemukan');
     }
+    /** @test */
+    public function it_creates_directories_if_they_do_not_exist()
+    {
+        // Setup: Ensure directories do not exist
+        $dirsToCheck = [
+            app_path('Models'),
+            app_path('Http/Services'),
+            app_path('Http/Controllers'),
+            base_path('tests/Feature'),
+        ];
+
+        foreach ($dirsToCheck as $dir) {
+            if (File::exists($dir)) {
+                File::deleteDirectory($dir);
+            }
+            $this->assertFalse(File::exists($dir), "Failed to delete directory: $dir");
+        }
+
+        // Run command
+        $this->artisan('make:crud', ['name' => 'NewDirTest'])
+            ->assertExitCode(0);
+
+        // Verify directories created
+        foreach ($dirsToCheck as $dir) {
+            $this->assertTrue(File::exists($dir), "Directory not created: $dir");
+        }
+
+        // Clean up created files (standard cleanup will handle files, but we leave dirs)
+    }
 }

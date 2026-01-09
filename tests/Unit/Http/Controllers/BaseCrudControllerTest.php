@@ -25,8 +25,7 @@ class BaseCrudControllerTest extends TestCase
 
         $this->serviceMock = Mockery::mock(BaseCrudService::class);
 
-        $this->controller = new class($this->serviceMock) extends BaseCrudController
-        {
+        $this->controller = new class ($this->serviceMock) extends BaseCrudController {
             protected $service;
 
             protected string $storeRequest = TestCrudRequest::class;
@@ -57,8 +56,7 @@ class BaseCrudControllerTest extends TestCase
     {
         $this->serviceMock->shouldReceive('model')->andReturn(new ControllerTestModel);
 
-        $controller = new class($this->serviceMock) extends BaseCrudController
-        {
+        $controller = new class ($this->serviceMock) extends BaseCrudController {
             protected $service;
 
             public function __construct($service)
@@ -208,6 +206,111 @@ class BaseCrudControllerTest extends TestCase
         $this->assertEquals('Bulk operation success', $response->getData(true)['message']);
         $this->assertEquals($summary, (array) $response->getData(true)['summary']);
     }
+
+    /** @test */
+    public function bulk_handles_non_existent_request_class()
+    {
+        $controller = new class ($this->serviceMock) extends BaseCrudController {
+            protected $service;
+            protected string $storeRequest = 'NonExistentClass'; // Class does not exist
+
+            public function __construct($service)
+            {
+                parent::__construct();
+                $this->service = $service;
+            }
+
+            public function service(): BaseCrudService
+            {
+                return $this->service;
+            }
+        };
+
+        $request = Request::create('/bulk', 'POST', []);
+
+        $this->serviceMock->shouldReceive('bulkHandle')->once()->andReturn([]);
+
+        $response = $controller->bulk($request);
+
+        $this->assertEquals('Bulk operation success', $response->getData(true)['message']);
+    }
+
+    /** @test */
+    public function bulk_handles_request_class_without_rules_method()
+    {
+        $controller = new class ($this->serviceMock) extends BaseCrudController {
+            protected $service;
+            protected string $storeRequest = RequestWithoutRules::class;
+
+            public function __construct($service)
+            {
+                parent::__construct();
+                $this->service = $service;
+            }
+
+            public function service(): BaseCrudService
+            {
+                return $this->service;
+            }
+        };
+
+        $request = Request::create('/bulk', 'POST', []);
+
+        $this->serviceMock->shouldReceive('bulkHandle')->once()->andReturn([]);
+
+        $response = $controller->bulk($request);
+
+        $this->assertEquals('Bulk operation success', $response->getData(true)['message']);
+    }
+
+    /** @test */
+    public function index_handles_invalid_filter_format()
+    {
+        // filter should be array, passing string
+        $request = Request::create('/?filter=invalid_string', 'GET');
+
+        // Service expect filter to be empty array if invalid
+        $this->serviceMock->shouldReceive('getAll')
+            ->once()
+            ->with(Mockery::on(function ($dto) {
+                return $dto->filter === [];
+            }))
+            ->andReturn(new \Illuminate\Database\Eloquent\Collection([]));
+
+        $response = $this->controller->index($request);
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+    }
+    /** @test */
+    public function bulk_executes_route_resolver_in_request()
+    {
+        $controller = new class ($this->serviceMock) extends BaseCrudController {
+            protected $service;
+            protected string $storeRequest = RequestWithRoute::class;
+
+            public function __construct($service)
+            {
+                parent::__construct();
+                $this->service = $service;
+            }
+
+            public function service(): BaseCrudService
+            {
+                return $this->service;
+            }
+        };
+
+        // Mock route
+        $route = (new \Illuminate\Routing\Route('POST', '/bulk', []))->bind(new Request);
+        $request = Request::create('/bulk', 'POST', []);
+        $request->setRouteResolver(fn() => $route);
+
+        $this->serviceMock->shouldReceive('bulkHandle')->once()->andReturn([]);
+
+        $response = $controller->bulk($request);
+
+        $this->assertEquals('Bulk operation success', $response->getData(true)['message']);
+    }
 }
 
 class TestCrudRequest extends CrudRequest
@@ -217,6 +320,22 @@ class TestCrudRequest extends CrudRequest
         return [];
     }
 }
+
+class RequestWithoutRules extends \Illuminate\Foundation\Http\FormRequest
+{
+    // No rules method
+}
+
+class RequestWithRoute extends \Illuminate\Foundation\Http\FormRequest
+{
+    public function rules(): array
+    {
+        // Accessing route should trigger the resolver closure
+        $this->route();
+        return [];
+    }
+}
+
 
 class ControllerTestModel extends CrudModel
 {

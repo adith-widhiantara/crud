@@ -260,8 +260,7 @@ class BaseCrudServiceTest extends TestCase
     /** @test */
     public function it_throws_exception_if_wildcard_column_is_used()
     {
-        $model = new class extends ServiceTestModel
-        {
+        $model = new class extends ServiceTestModel {
             public function getShowOnListColumns(): array
             {
                 return ['test_models.*']; // Invalid
@@ -269,8 +268,7 @@ class BaseCrudServiceTest extends TestCase
         };
 
         // Mock service to use this model
-        $service = new class($model) extends BaseCrudService
-        {
+        $service = new class ($model) extends BaseCrudService {
             protected $model;
 
             public function __construct($model)
@@ -423,16 +421,14 @@ class BaseCrudServiceTest extends TestCase
         ServiceTestModel::create(['name' => 'Item 2', 'related_model_id' => $related2->id]);
 
         // Mock Service with nested search column
-        $model = new class extends ServiceTestModel
-        {
+        $model = new class extends ServiceTestModel {
             public function searchableColumns(): array
             {
                 return ['related.description'];
             }
         };
 
-        $service = new class($model) extends BaseCrudService
-        {
+        $service = new class ($model) extends BaseCrudService {
             protected $model;
 
             public function __construct($model)
@@ -486,6 +482,53 @@ class BaseCrudServiceTest extends TestCase
         $this->assertCount(1, $result);
         $this->assertEquals('A', $result->first()->name);
     }
+    /** @test */
+    public function it_ignores_filter_column_not_in_allowed_filters()
+    {
+        ServiceTestModel::create(['name' => 'A', 'price' => 10]);
+        ServiceTestModel::create(['name' => 'B', 'price' => 20]);
+
+        $service = new ConcreteService;
+
+        // 'name' is not in filterableColumns (only status, price, related.description)
+        $dto = $this->createDto(filter: ['name' => 'A']);
+        $result = $service->getAll($dto);
+
+        // Should ignore filter and return all
+        $this->assertCount(2, $result);
+    }
+
+    /** @test */
+    public function it_throws_exception_if_wildcard_column_is_used_on_relation()
+    {
+        $service = new ConcreteService;
+
+        $model = new class extends ServiceTestModel {
+            public function getShowOnListColumns(): array
+            {
+                return ['related.*']; // Invalid wildcard on relation
+            }
+        };
+
+        $service = new class ($model) extends BaseCrudService {
+            protected $model;
+
+            public function __construct($model)
+            {
+                $this->model = $model;
+            }
+
+            public function model(): CrudModel
+            {
+                return $this->model;
+            }
+        };
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Please define specific columns');
+
+        $service->getAll($this->createDto());
+    }
 }
 
 class ServiceTestModel extends CrudModel
@@ -501,7 +544,7 @@ class ServiceTestModel extends CrudModel
 
     public function filterableColumns(): array
     {
-        return [$this->table.'.status', 'price', 'related.description'];
+        return [$this->table . '.status', 'price', 'related.description'];
     }
 
     public function searchableColumns(): array
