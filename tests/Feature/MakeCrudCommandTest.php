@@ -140,7 +140,7 @@ class MakeCrudCommandTest extends TestCase
     /** @test */
     public function it_creates_directories_if_they_do_not_exist()
     {
-        // Setup: Ensure directories do not exist
+        // Simulate missing directories for the specific paths we want to test
         $dirsToCheck = [
             app_path('Models'),
             app_path('Http/Services'),
@@ -148,22 +148,34 @@ class MakeCrudCommandTest extends TestCase
             base_path('tests/Feature'),
         ];
 
-        foreach ($dirsToCheck as $dir) {
-            if (File::exists($dir)) {
-                File::deleteDirectory($dir);
-            }
-            $this->assertFalse(File::exists($dir), "Failed to delete directory: $dir");
-        }
+        File::shouldReceive('exists')
+            ->andReturnUsing(function ($path) use ($dirsToCheck) {
+                // If it is one of our target directories, return false to trigger creation logic
+                if (in_array($path, $dirsToCheck)) {
+                    return false;
+                }
+
+                // For other entries (like verifying if generated file exists), allow checking real filesystem
+                // or just return false so it proceeds to overwrite/create
+                return file_exists($path);
+            });
+
+        // Expect makeDirectory calls
+        File::shouldReceive('makeDirectory')->with(app_path('Models'), 0755, true)->once();
+        File::shouldReceive('makeDirectory')->with(app_path('Http/Services'), 0755, true)->once();
+        File::shouldReceive('makeDirectory')->with(app_path('Http/Controllers'), 0755, true)->once();
+        File::shouldReceive('makeDirectory')->with(base_path('tests/Feature'), 0755, true)->once();
+
+        // Expect put calls (file generation)
+        File::shouldReceive('put')->andReturn(true);
+
+        // Allow other standard File method calls that might occur (e.g. in tearDown)
+        File::shouldReceive('delete')->andReturn(true);
+        File::shouldReceive('glob')->andReturn([]);
+        File::shouldReceive('isDirectory')->andReturn(false);
 
         // Run command
         $this->artisan('make:crud', ['name' => 'NewDirTest'])
             ->assertExitCode(0);
-
-        // Verify directories created
-        foreach ($dirsToCheck as $dir) {
-            $this->assertTrue(File::exists($dir), "Directory not created: $dir");
-        }
-
-        // Clean up created files (standard cleanup will handle files, but we leave dirs)
     }
 }
