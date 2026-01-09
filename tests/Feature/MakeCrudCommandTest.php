@@ -32,6 +32,11 @@ class MakeCrudCommandTest extends TestCase
             app_path('Http/Controllers/UserProfileController.php'),
             app_path('Http/Services/UserProfileService.php'),
             base_path('tests/Feature/UserProfileControllerTest.php'),
+            // Files for NewDirTest
+            app_path('Models/NewDirTest.php'),
+            app_path('Http/Services/NewDirTestService.php'),
+            app_path('Http/Controllers/NewDirTestController.php'),
+            base_path('tests/Feature/NewDirTestControllerTest.php'),
         ];
 
         foreach ($filesToDelete as $file) {
@@ -48,6 +53,11 @@ class MakeCrudCommandTest extends TestCase
 
         $migrationsUserProfile = File::glob(database_path('migrations/*_create_user_profiles_table.php'));
         foreach ($migrationsUserProfile as $migration) {
+            File::delete($migration);
+        }
+
+        $migrationsNewDirTest = File::glob(database_path('migrations/*_create_new_dir_tests_table.php'));
+        foreach ($migrationsNewDirTest as $migration) {
             File::delete($migration);
         }
     }
@@ -136,5 +146,55 @@ class MakeCrudCommandTest extends TestCase
         // Cek migration name harus plural snake_case: user_profiles
         $migrations = File::glob(database_path('migrations/*_create_user_profiles_table.php'));
         $this->assertCount(1, $migrations, 'Migration user_profiles tidak ditemukan');
+    }
+    /** @test */
+    public function it_creates_directories_if_they_do_not_exist()
+    {
+        // Simulate missing directories for the specific paths we want to test
+        $dirsToCheck = [
+            app_path('Models'),
+            app_path('Http/Services'),
+            app_path('Http/Controllers'),
+            base_path('tests/Feature'),
+        ];
+
+        File::shouldReceive('exists')
+            ->andReturnUsing(function ($path) use ($dirsToCheck) {
+                // If it is one of our target directories, return false to trigger creation logic
+                if (in_array($path, $dirsToCheck)) {
+                    return false;
+                }
+
+                // For other entries (like verifying if generated file exists), allow checking real filesystem
+                // or just return false so it proceeds to overwrite/create
+                return file_exists($path);
+            });
+
+        // Allow reading files (e.g. stubs for migration)
+        File::shouldReceive('get')
+            ->andReturnUsing(function ($path) {
+                return file_get_contents($path);
+            });
+
+        // Allow migration creator to ensure directory exists
+        File::shouldReceive('ensureDirectoryExists')->andReturn(true);
+
+        // Expect makeDirectory calls
+        File::shouldReceive('makeDirectory')->with(app_path('Models'), 0755, true)->once();
+        File::shouldReceive('makeDirectory')->with(app_path('Http/Services'), 0755, true)->once();
+        File::shouldReceive('makeDirectory')->with(app_path('Http/Controllers'), 0755, true)->once();
+        File::shouldReceive('makeDirectory')->with(base_path('tests/Feature'), 0755, true)->once();
+
+        // Expect put calls (file generation)
+        File::shouldReceive('put')->andReturn(true);
+
+        // Allow other standard File method calls that might occur (e.g. in tearDown)
+        File::shouldReceive('delete')->andReturn(true);
+        File::shouldReceive('glob')->andReturn([]);
+        File::shouldReceive('isDirectory')->andReturn(false);
+
+        // Run command
+        $this->artisan('make:crud', ['name' => 'NewDirTest'])
+            ->assertExitCode(0);
     }
 }
