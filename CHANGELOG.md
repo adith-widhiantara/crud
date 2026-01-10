@@ -4,7 +4,8 @@
 
 ### Added
 
-- **Ambiguous Column Protection**: Added logic to automatically prepend the parent table name to filtered columns to prevent SQL errors when joining tables.
+- **Unit Tests**: Added unit tests, achieving 99.4% coverage based on SonarQube.
+- **Docker Support**: Added `Dockerfile` to facilitate package development using Docker. 
 
 ### Changed
 
@@ -12,7 +13,7 @@
 
 ### Fixed
 
--
+- **Table Qualification**: Prepended table names to all parent table columns to minimize ambiguous column errors.
 
 ## [1.3.0] - 2026-01-07
 
