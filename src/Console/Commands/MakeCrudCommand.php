@@ -5,6 +5,7 @@ namespace Adithwidhiantara\Crud\Console\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
+use Adithwidhiantara\Crud\Generators\CrudStub;
 
 class MakeCrudCommand extends Command
 {
@@ -62,21 +63,7 @@ class MakeCrudCommand extends Command
             '--model' => $name,
         ]);
 
-        $content = <<<PHP
-<?php
-
-namespace App\Models;
-
-use Adithwidhiantara\Crud\Http\Models\CrudModel;
-
-class {$name} extends CrudModel
-{
-    public function getShowOnListColumns(): array
-    {
-        return [];
-    }
-}
-PHP;
+        $content = CrudStub::model($name);
 
         File::put($path, $content);
         $this->info("✅ Model & Factory created: app/Models/{$name}.php");
@@ -84,46 +71,14 @@ PHP;
 
     protected function generateService(string $name): void
     {
-        $content = <<<PHP
-<?php
-
-namespace App\Http\Services;
-
-use Adithwidhiantara\Crud\Http\Services\BaseCrudService;
-use Adithwidhiantara\Crud\Http\Models\CrudModel;
-use App\Models\\{$name};
-
-class {$name}Service extends BaseCrudService
-{
-    public function model(): CrudModel
-    {
-        return new {$name}();
-    }
-}
-PHP;
+        $content = CrudStub::service($name);
 
         $this->createFile(app_path('Http/Services'), "{$name}Service.php", $content, 'Service', "{$name}Service");
     }
 
     protected function generateController(string $name): void
     {
-        $content = <<<PHP
-<?php
-
-namespace App\Http\Controllers;
-
-use Adithwidhiantara\Crud\Http\Controllers\BaseCrudController;
-use Adithwidhiantara\Crud\Http\Services\BaseCrudService;
-use App\Http\Services\\{$name}Service;
-
-class {$name}Controller extends BaseCrudController
-{
-    public function service(): BaseCrudService
-    {
-        return new {$name}Service();
-    }
-}
-PHP;
+        $content = CrudStub::controller($name);
 
         $this->createFile(app_path('Http/Controllers'), "{$name}Controller.php", $content, 'Controller', "{$name}Controller");
     }
@@ -164,80 +119,7 @@ PHP;
 
         // Perbaikan: Namespace standar Laravel 'Tests\Feature'
         // Fitur: Langsung generate 5 method test utama
-        $content = <<<PHP
-<?php
-
-namespace Tests\Feature;
-
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
-use {$modelClass};
-
-class {$name}ControllerTest extends TestCase
-{
-    use RefreshDatabase;
-
-    protected string \$endpoint = '/api/{$routeSlug}';
-
-    public function test_can_get_list_of_{$routeSlug}(): void
-    {
-        {$name}::factory()->count(3)->create();
-
-        \$response = \$this->getJson(\$this->endpoint);
-
-        \$response->assertStatus(200)
-                 ->assertJsonStructure(['data']);
-    }
-
-    public function test_can_store_new_{$routeSlug}(): void
-    {
-        \$data = {$name}::factory()->make()->toArray();
-
-        \$response = \$this->postJson(\$this->endpoint, \$data);
-
-        \$response->assertStatus(200)
-                 ->assertJson(['message' => 'success']);
-        
-        // Pastikan data masuk database
-        \$this->assertDatabaseHas((new {$name})->getTable(), \$data);
-    }
-
-    public function test_can_show_detail_{$routeSlug}(): void
-    {
-        \$model = {$name}::factory()->create();
-
-        \$response = \$this->getJson(\$this->endpoint . '/' . \$model->id);
-
-        \$response->assertStatus(200)
-                 ->assertJson(['id' => \$model->id]);
-    }
-
-    public function test_can_update_{$routeSlug}(): void
-    {
-        \$model = {$name}::factory()->create();
-        \$newData = {$name}::factory()->make()->toArray();
-
-        \$response = \$this->putJson(\$this->endpoint . '/' . \$model->id, \$newData);
-
-        \$response->assertStatus(200)
-                 ->assertJson(['message' => 'success']);
-
-        \$this->assertDatabaseHas((new {$name})->getTable(), \$newData);
-    }
-
-    public function test_can_delete_{$routeSlug}(): void
-    {
-        \$model = {$name}::factory()->create();
-
-        \$response = \$this->deleteJson(\$this->endpoint . '/' . \$model->id);
-
-        \$response->assertStatus(200)
-                 ->assertJson(['message' => 'success']);
-
-        \$this->assertDatabaseMissing((new {$name})->getTable(), ['id' => \$model->id]);
-    }
-}
-PHP;
+        $content = CrudStub::unitTest($name, $routeSlug, $modelClass);
 
         File::put($path, $content);
         $this->info("✅ Unit Test created: tests/Feature/{$name}ControllerTest.php");
