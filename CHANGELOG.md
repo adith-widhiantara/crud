@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.3.1] - 2026-01-10
+
+### Added
+
+- **Ambiguous Column Protection**: Added logic to automatically prepend the parent table name to filtered columns to prevent SQL errors when joining tables.
+
+### Changed
+
+-
+
+### Fixed
+
+-
+
 ## [1.3.0] - 2026-01-07
 
 ### Added
