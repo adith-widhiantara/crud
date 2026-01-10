@@ -44,7 +44,7 @@ class MakeCrudCommand extends Command
     protected function generateModel(string $name): void
     {
         // Pastikan direktori Models ada
-        if (! File::exists(app_path('Models'))) {
+        if (!File::exists(app_path('Models'))) {
             File::makeDirectory(app_path('Models'), 0755, true);
         }
 
@@ -58,7 +58,7 @@ class MakeCrudCommand extends Command
 
         // make factory
         $this->call('make:factory', [
-            'name' => $name.'Factory',
+            'name' => $name . 'Factory',
             '--model' => $name,
         ]);
 
@@ -84,20 +84,6 @@ PHP;
 
     protected function generateService(string $name): void
     {
-        // Pastikan direktori Services ada
-        $directory = app_path('Http/Services');
-        if (! File::exists($directory)) {
-            File::makeDirectory($directory, 0755, true);
-        }
-
-        $path = "{$directory}/{$name}Service.php";
-
-        if (File::exists($path)) {
-            $this->warn("Service {$name}Service already exists. Skipped.");
-
-            return;
-        }
-
         $content = <<<PHP
 <?php
 
@@ -116,26 +102,11 @@ class {$name}Service extends BaseCrudService
 }
 PHP;
 
-        File::put($path, $content);
-        $this->info("✅ Service created: app/Http/Services/{$name}Service.php");
+        $this->createFile(app_path('Http/Services'), "{$name}Service.php", $content, 'Service', "{$name}Service");
     }
 
     protected function generateController(string $name): void
     {
-        // Pastikan direktori Controllers ada
-        $directory = app_path('Http/Controllers');
-        if (! File::exists($directory)) {
-            File::makeDirectory($directory, 0755, true);
-        }
-
-        $path = "{$directory}/{$name}Controller.php";
-
-        if (File::exists($path)) {
-            $this->warn("Controller {$name}Controller already exists. Skipped.");
-
-            return;
-        }
-
         $content = <<<PHP
 <?php
 
@@ -154,8 +125,7 @@ class {$name}Controller extends BaseCrudController
 }
 PHP;
 
-        File::put($path, $content);
-        $this->info("✅ Controller created: app/Http/Controllers/{$name}Controller.php");
+        $this->createFile(app_path('Http/Controllers'), "{$name}Controller.php", $content, 'Controller', "{$name}Controller");
     }
 
     protected function generateMigration(string $tableName): void
@@ -177,7 +147,7 @@ PHP;
     protected function generateUnitTest(string $name): void
     {
         $directory = base_path('tests/Feature');
-        if (! File::exists($directory)) {
+        if (!File::exists($directory)) {
             File::makeDirectory($directory, 0755, true);
         }
 
@@ -271,5 +241,23 @@ PHP;
 
         File::put($path, $content);
         $this->info("✅ Unit Test created: tests/Feature/{$name}ControllerTest.php");
+    }
+    protected function createFile(string $directory, string $filename, string $content, string $type, string $entityName): void
+    {
+        if (!File::exists($directory)) {
+            File::makeDirectory($directory, 0755, true);
+        }
+
+        $path = "{$directory}/{$filename}";
+
+        if (File::exists($path)) {
+            $this->warn("{$type} {$entityName} already exists. Skipped.");
+
+            return;
+        }
+
+        File::put($path, $content);
+        $relativePath = Str::replace(base_path() . '/', '', $path);
+        $this->info("✅ {$type} created: {$relativePath}");
     }
 }

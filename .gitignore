@@ -3,3 +3,5 @@
 .idea/
 
 .phpunit.cache/
+sonar-project.properties
+coverage.xml

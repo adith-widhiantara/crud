@@ -17,3 +17,12 @@ services:
     # atau bisa dihapus jika kita hanya ingin menjalankan command "run"
     command: tail -f /dev/null
     tty: true
+
+  sonar-scanner:
+    image: sonarsource/sonar-scanner-cli
+    profiles: [ "local" ]
+    volumes:
+      - ./:/app
+    working_dir: /app
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
